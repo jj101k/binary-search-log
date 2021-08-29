@@ -1,4 +1,4 @@
-import { Filename } from "./src/BinarySearchLog"
+import { Filename } from "./"
 
 const file = new Filename(
     line => line.match(/process[.]/) ? 1 : 0,
