@@ -2,9 +2,9 @@
   "name": "binary-search-log",
   "version": "1.0.0",
   "description": "A binary searcher for plain-text timestamped logs",
-  "main": "index.js",
+  "main": "dist/index.js",
   "bin": {
-    "binary-search-log": "bin.js"
+    "binary-search-log": "dist/bin.js"
   },
   "scripts": {
     "build": "tsc",
