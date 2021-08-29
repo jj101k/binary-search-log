@@ -5,3 +5,4 @@ const file = new Filename(
     process.argv[2]
 )
 file.read()
+file.finish()
