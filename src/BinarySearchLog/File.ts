@@ -4,11 +4,6 @@ export class File {
     /**
      *
      */
-    private filehandle: number
-
-    /**
-     *
-     */
     private currentBlockLines: string[] = []
 
     /**
@@ -26,9 +21,8 @@ export class File {
     constructor(
         private lineCheck: (line: string) => number,
         private filename: string,
-        filehandle?: number,
+        protected filehandle: number,
     ) {
-        this.filehandle = filehandle || fs.openSync(this.filename, "r")
     }
 
     /**

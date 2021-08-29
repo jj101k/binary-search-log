@@ -1,6 +1,6 @@
-import { File } from "./src/BinarySearchLog"
+import { Filename } from "./src/BinarySearchLog"
 
-const file = new File(
+const file = new Filename(
     line => line.match(/process[.]/) ? 1 : 0,
     process.argv[2]
 )
