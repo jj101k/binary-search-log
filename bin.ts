@@ -1,4 +1,4 @@
-import { Filename } from "./"
+import { Filename } from "./index"
 
 const file = new Filename(
     line => line.match(/process[.]/) ? 1 : 0,
