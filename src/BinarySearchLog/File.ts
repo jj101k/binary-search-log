@@ -67,7 +67,7 @@ export class File {
     /**
      *
      */
-    async read() {
+    async *read() {
         if(this.firstLineIsInRange() && this.lastLineIsInRange()) {
             let line: string | null
             do {
@@ -77,7 +77,7 @@ export class File {
                     if(relativePosition > 0) {
                         return
                     } else if(relativePosition == 0) {
-                        process.stdout.write(line + "\n")
+                        yield line + "\n"
                     }
                 }
             } while(line !== null)
