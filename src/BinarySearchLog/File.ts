@@ -104,12 +104,10 @@ export class File {
 
     private async firstLineRelativePosition() {
         const line = await this.readSubsequentLine(0)
-        if(line !== null) {
-            const relativePosition = this.lineCheck(line)
-            return relativePosition
-        } else {
+        if(line === null) {
             throw new Error(`Unable to find first line of ${this.filename}`)
         }
+        return this.lineCheck(line)
     }
 
     private async lastLineRelativePosition() {
