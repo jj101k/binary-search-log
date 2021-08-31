@@ -112,20 +112,20 @@ export class File {
 
     private async lastLineRelativePosition() {
         const lastLineEstimatedLength = 1024
-        const lastLineOffset = lastLineEstimatedLength
-        let secondToLastLine: string | null = null
         const stat = fs.fstatSync(this.filehandle)
-        const fileLength = stat.blocks * stat.blksize
-        while(secondToLastLine === null && lastLineOffset < fileLength) {
-            secondToLastLine = await this.readSubsequentLine(fileLength - lastLineOffset)
-        }
-        if(secondToLastLine !== null) {
-            let lastLine: string | null = null
-            do {
-                lastLine = await this.readSubsequentLine()
-            } while(lastLine === null)
-            return this.lineCheck(lastLine)
-        }
+
+        const read = util.promisify(fs.read)
+        let chunkSize = lastLineEstimatedLength
+        do {
+            const buffer = Buffer.alloc(chunkSize)
+            const result = await read(this.filehandle, buffer, 0, chunkSize, Math.max(stat.size - 1 - chunkSize, 0))
+            const contents = this.currentPartialLine + buffer.toString("utf8", 0, result.bytesRead)
+            let md: RegExpMatchArray | null
+            if(md = contents.match(/\n(.+\n?)$/)) {
+                return this.lineCheck(md[1])
+            }
+            chunkSize *= 2
+        } while(chunkSize < stat.size * 2)
         throw new Error(`Unable to find last line of ${this.filename}`)
     }
 }
