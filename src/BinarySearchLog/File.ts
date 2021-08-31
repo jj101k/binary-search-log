@@ -13,6 +13,11 @@ export class File {
 
     /**
      *
+     */
+    private nextPosition = 0
+
+    /**
+     *
      * @param lineCheck This must return -1 for lines before the intended range,
      * 1 for lines after the intended range, and 0 for lines in range
      * @param filename
@@ -30,18 +35,18 @@ export class File {
      * @param position
      */
     private async readSubsequentLine(position: number | null = null) {
-        let nextPosition: number | null
         if(position !== null) {
             this.currentBlockLines = []
             this.currentPartialLine = ""
+            this.nextPosition = position
         }
-        nextPosition = position
         if(!this.currentBlockLines.length) {
             const read = util.promisify(fs.read)
             const chunkSize = 65536
             const buffer = Buffer.alloc(chunkSize)
+            let i = 0
             do {
-                const result = await read(this.filehandle, buffer, 0, chunkSize, nextPosition)
+                const result = await read(this.filehandle, buffer, 0, chunkSize, this.nextPosition)
                 if(result.bytesRead == 0) {
                     if(this.currentPartialLine.length) {
                         const line = this.currentPartialLine
@@ -53,10 +58,11 @@ export class File {
                 }
                 const contents = this.currentPartialLine + buffer.toString("utf8", 0, result.bytesRead)
                 const lines = contents.split(/\n/)
-                if(nextPosition) {
-                    nextPosition = null
+                if(i == 0 && this.nextPosition > 0) {
                     lines.shift()
                 }
+                this.nextPosition += result.bytesRead
+                i++
                 this.currentPartialLine = lines.pop() || ""
                 this.currentBlockLines = lines
             } while(this.currentBlockLines.length == 0)
