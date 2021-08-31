@@ -84,7 +84,44 @@ export class File {
             console.info(`First line is after range in ${this.filename}`)
             return
         }
-        let fromPosition: number | null = 0
+        let fromPosition: number | null
+        if(firstLinePosition < 0) {
+            // Find start
+            const stat = fs.fstatSync(this.filehandle)
+
+            const read = util.promisify(fs.read)
+            let before = -1
+            let after = stat.size
+            let testPosition: number
+            let chunkSize = 65536
+            do {
+                testPosition = Math.round((before + after) / 2)
+                const buffer = Buffer.alloc(chunkSize)
+                const result = await read(this.filehandle, buffer, 0, chunkSize, testPosition)
+                const contents = this.currentPartialLine + buffer.toString("utf8", 0, result.bytesRead)
+                let md: RegExpMatchArray | null
+                if(md = contents.match(/^(?:.*)\n(.+\n?)/)) {
+                    const state = this.lineCheck(md[1])
+                    if(state >= 0) {
+                        after = testPosition
+                    } else {
+                        before = testPosition
+                    }
+                    chunkSize = 65536
+                } else {
+                    if(testPosition + chunkSize > stat.size) {
+                        after = testPosition
+                        chunkSize = 65536
+                    } else {
+                        chunkSize *= 2
+                    }
+                }
+            } while(after > before + 1)
+            fromPosition = before
+        } else {
+            // Start from zero
+            fromPosition = 0
+        }
         let line: string | null
         do {
             line = await this.readSubsequentLine(fromPosition)
