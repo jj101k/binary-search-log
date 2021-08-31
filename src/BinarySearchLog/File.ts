@@ -14,6 +14,11 @@ export class File {
     /**
      *
      */
+    private defaultChunkSize = 65536
+
+    /**
+     *
+     */
     private nextPosition = 0
 
     /**
@@ -42,7 +47,7 @@ export class File {
         }
         if(!this.currentBlockLines.length) {
             const read = util.promisify(fs.read)
-            const chunkSize = 65536
+            const chunkSize = this.defaultChunkSize
             const buffer = Buffer.alloc(chunkSize)
             let i = 0
             do {
@@ -93,7 +98,7 @@ export class File {
             let before = -1
             let after = stat.size
             let testPosition: number
-            let chunkSize = 65536
+            let chunkSize = this.defaultChunkSize
             do {
                 testPosition = Math.round((before + after) / 2)
                 const buffer = Buffer.alloc(chunkSize)
@@ -107,11 +112,11 @@ export class File {
                     } else {
                         before = testPosition
                     }
-                    chunkSize = 65536
+                    chunkSize = this.defaultChunkSize
                 } else {
                     if(testPosition + chunkSize > stat.size) {
                         after = testPosition
-                        chunkSize = 65536
+                        chunkSize = this.defaultChunkSize
                     } else {
                         chunkSize *= 2
                     }
