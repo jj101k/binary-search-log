@@ -74,33 +74,45 @@ export class File {
      *
      */
     async *read() {
-        if(this.firstLineIsInRange() && this.lastLineIsInRange()) {
-            let line: string | null
-            do {
-                line = await this.readSubsequentLine()
-                if(line !== null) {
-                    const relativePosition = this.lineCheck(line)
-                    if(relativePosition > 0) {
-                        return
-                    } else if(relativePosition == 0) {
-                        yield line + "\n"
-                    }
-                }
-            } while(line !== null)
+        const lastLineRelativePosition = await this.lastLineRelativePosition()
+        if(lastLineRelativePosition < 0) {
+            console.info(`Last line is before range in ${this.filename}`)
+            return
         }
+        const firstLinePosition = await this.firstLineRelativePosition()
+        if(firstLinePosition > 0) {
+            console.info(`First line is after range in ${this.filename}`)
+            return
+        }
+        let fromPosition: number | null = 0
+        let line: string | null
+        do {
+            line = await this.readSubsequentLine(fromPosition)
+            if(fromPosition !== null) {
+                fromPosition = null
+            }
+            if(line !== null) {
+                const relativePosition = this.lineCheck(line)
+                if(relativePosition > 0) {
+                    return
+                } else if(relativePosition == 0) {
+                    yield line + "\n"
+                }
+            }
+        } while(line !== null)
     }
 
-    private async firstLineIsInRange() {
+    private async firstLineRelativePosition() {
         const line = await this.readSubsequentLine(0)
         if(line !== null) {
             const relativePosition = this.lineCheck(line)
-            return relativePosition <= 0
+            return relativePosition
         } else {
-            return false
+            throw new Error(`Unable to find first line of ${this.filename}`)
         }
     }
 
-    private async lastLineIsInRange() {
+    private async lastLineRelativePosition() {
         const lastLineEstimatedLength = 1024
         const lastLineOffset = lastLineEstimatedLength
         let secondToLastLine: string | null = null
@@ -114,8 +126,8 @@ export class File {
             do {
                 lastLine = await this.readSubsequentLine()
             } while(lastLine === null)
-            const relativePosition = this.lineCheck(lastLine)
-            return relativePosition >= 0
+            return this.lineCheck(lastLine)
         }
+        throw new Error(`Unable to find last line of ${this.filename}`)
     }
 }
