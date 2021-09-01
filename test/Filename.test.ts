@@ -1,7 +1,11 @@
 import assert from "assert"
-import {describe, it} from "mocha"
+import * as fs from "fs"
+import {before, describe, it, Test} from "mocha"
+import {sep} from "path"
+import * as os from "os"
 
 import { Filename } from "../index"
+import { TestLogFileData } from "./src/TestLogFileData"
 
 describe("File tests", () => {
     const example1To100LogFile = __dirname + "/data/range1-100.log.example"
@@ -75,5 +79,36 @@ describe("File tests", () => {
         }
         file.finish()
         assert.equal(seenLines, 11, "Matching lines seen")
+    })
+
+    // You can remove .skip below if you want to try this.
+    describe.skip("large file tests", () => {
+        const largeLogFileLines = 2_000_000
+        const logFileData = new TestLogFileData(largeLogFileLines)
+        before(() => logFileData.build())
+        after(() => logFileData.finish())
+        it("Can read in-range files (middle, large)", async function() {
+            this.timeout(20)
+            const file = new Filename(
+                line => {
+                    const n = +(line.split(/ /)[0])
+                    if(n < largeLogFileLines / 2 + 10) return -1
+                    else if(n > largeLogFileLines / 2 + 20) return 1
+                    else return 0
+                },
+                logFileData.filename!
+            )
+            let seenLines = 0
+            const start = new Date()
+            for await(const line of file.read()) {
+                const timestamp = +line.replace(/ .*/, "")
+                assert(timestamp >= largeLogFileLines / 2 + 10 && timestamp <= largeLogFileLines / 2 + 20)
+                seenLines++
+            }
+            file.finish()
+            const finish = new Date()
+            assert.equal(seenLines, 11, "Matching lines seen")
+            console.log(`Searched ${logFileData.filename!} in ${finish.valueOf() - start.valueOf()}ms`)
+        })
     })
 })
