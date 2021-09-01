@@ -27,11 +27,13 @@ export class File {
      * 1 for lines after the intended range, and 0 for lines in range
      * @param filename
      * @param filehandle
+     * @param lineEnding
      */
     constructor(
         private lineCheck: (line: string) => number,
         private filename: string,
         protected filehandle: number,
+        private lineEnding: RegExp = /\n/,
     ) {
     }
 
@@ -62,7 +64,7 @@ export class File {
                     }
                 }
                 const contents = this.currentPartialLine + buffer.toString("utf8", 0, result.bytesRead)
-                const lines = contents.split(/\n/)
+                const lines = contents.split(this.lineEnding)
                 if(i == 0 && this.nextPosition > 0) {
                     lines.shift()
                 }
@@ -104,7 +106,7 @@ export class File {
                 const buffer = Buffer.alloc(chunkSize)
                 const result = await read(this.filehandle, buffer, 0, chunkSize, testPosition)
                 const contents = this.currentPartialLine + buffer.toString("utf8", 0, result.bytesRead)
-                const lines = contents.split(/\n/, 2)
+                const lines = contents.split(this.lineEnding, 2)
                 if(lines.length > 1) {
                     const state = this.lineCheck(lines[1])
                     if(state >= 0) {
