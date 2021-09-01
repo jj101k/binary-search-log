@@ -104,9 +104,9 @@ export class File {
                 const buffer = Buffer.alloc(chunkSize)
                 const result = await read(this.filehandle, buffer, 0, chunkSize, testPosition)
                 const contents = this.currentPartialLine + buffer.toString("utf8", 0, result.bytesRead)
-                let md: RegExpMatchArray | null
-                if(md = contents.match(/^(?:.*)\n(.+\n?)/)) {
-                    const state = this.lineCheck(md[1])
+                const lines = contents.split(/\n/, 2)
+                if(lines.length > 1) {
+                    const state = this.lineCheck(lines[1])
                     if(state >= 0) {
                         after = testPosition
                     } else {
