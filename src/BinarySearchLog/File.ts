@@ -1,5 +1,6 @@
 import * as fs from "fs"
 import * as util from "util"
+import { UNIXLine } from "./EOLPattern"
 export class File {
     /**
      *
@@ -33,7 +34,7 @@ export class File {
         private lineCheck: (line: string) => number,
         private filename: string,
         protected filehandle: number,
-        private lineEnding: RegExp = /\n/,
+        private lineEnding: RegExp = UNIXLine,
     ) {
     }
 
