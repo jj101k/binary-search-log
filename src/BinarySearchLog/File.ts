@@ -159,6 +159,15 @@ export class File {
             console.info(`First line is after range in ${this.filename}`)
             return
         }
+
+        let toPosition: number | null
+        if(lastLineRelativePosition > 0) {
+            // Find finish
+            toPosition = await this.findPosition(state => state > 0)
+        } else {
+            // end at the end
+            toPosition = this.fileLength
+        }
         let fromPosition: number | null
         if(firstLinePosition < 0) {
             // Find start
@@ -167,21 +176,25 @@ export class File {
             // Start from zero
             fromPosition = 0
         }
-        let line: string | null
-        do {
-            line = await this.readSubsequentLine(fromPosition)
-            if(fromPosition !== null) {
-                fromPosition = null
+        const read = util.promisify(fs.read)
+
+        let remaining = ""
+        const chunkSize = this.defaultChunkSize
+        const buffer = Buffer.alloc(chunkSize)
+
+        for(let pos = fromPosition; pos < toPosition; pos += chunkSize) {
+            const size = Math.min(toPosition, pos + chunkSize) - pos
+            const result = await read(this.filehandle, buffer, 0, size, pos)
+            const contents = remaining + buffer.toString("utf8", 0, result.bytesRead)
+            const lines = contents.split(this.capturingLineEnding)
+            remaining = lines.pop() ?? ""
+            for(let i = 0; i < lines.length; i += 2) {
+                yield lines[i] + lines[i + 1]
             }
-            if(line !== null) {
-                const relativePosition = this.lineCheck(line)
-                if(relativePosition > 0) {
-                    return
-                } else if(relativePosition == 0) {
-                    yield line + "\n"
-                }
-            }
-        } while(line !== null)
+        }
+        if(remaining != "") {
+            yield remaining
+        }
     }
 
     private async firstLineRelativePosition() {
