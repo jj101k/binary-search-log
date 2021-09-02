@@ -190,9 +190,9 @@ export class File {
             const offset = Math.max(this.fileLength - chunkSize, 0)
             const result = await read(this.filehandle, buffer, 0, chunkSize, offset)
             const contents = this.currentPartialLine + buffer.toString("utf8", 0, result.bytesRead)
-            const lines = contents.split(this.capturingLineEnding, 3)
+            const lines = contents.split(this.capturingLineEnding)
             if(lines.length > 2) {
-                return this.lineCheck(lines[2])
+                return this.lineCheck(lines[lines.length - 1])
             }
             chunkSize *= 2
         } while(chunkSize < this.fileLength * 2)
