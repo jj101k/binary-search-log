@@ -15,11 +15,6 @@ export class File {
     /**
      *
      */
-    private readonly maxLineLength = 1024 * 1024
-
-    /**
-     *
-     */
     private cachedFileLength: number | null = null
 
     /**
@@ -32,6 +27,11 @@ export class File {
         }
         return this.cachedFileLength
     }
+
+    /**
+     *
+     */
+    private readonly maxLineLength = 1024 * 1024
 
     /**
      *
@@ -149,12 +149,16 @@ export class File {
      * This reads all the lines in range, as a series of blocks
      */
     async *read() {
-        const lastLineRelativePosition = await this.lastLineRelativePosition()
+        const lastLineRelativePosition = this.lineCheck(await this.readLastLineBackwards(this.fileLength))
         if(lastLineRelativePosition < 0) {
             console.info(`Last line is before range in ${this.filename}`)
             return
         }
-        const firstLinePosition = await this.firstLineRelativePosition()
+        const firstLine = await this.readFirstLineForwards(0)
+        if(!firstLine) {
+            throw new Error(`Unable to find first line of ${this.filename}`)
+        }
+        const firstLinePosition = this.lineCheck(firstLine)
         if(firstLinePosition > 0) {
             console.info(`First line is after range in ${this.filename}`)
             return
@@ -198,17 +202,5 @@ export class File {
                 yield lines[i] + lines[i + 1]
             }
         }
-    }
-
-    private async firstLineRelativePosition() {
-        const firstLine = await this.readFirstLineForwards(0)
-        if(!firstLine) {
-            throw new Error(`Unable to find first line of ${this.filename}`)
-        }
-        return this.lineCheck(firstLine)
-    }
-
-    private async lastLineRelativePosition() {
-        return this.lineCheck(await this.readLastLineBackwards(this.fileLength))
     }
 }
