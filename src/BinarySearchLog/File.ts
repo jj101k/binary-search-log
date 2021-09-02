@@ -5,22 +5,7 @@ export class File {
     /**
      *
      */
-    private currentBlockLines: string[] = []
-
-    /**
-     *
-     */
-    private currentPartialLine: string = ""
-
-    /**
-     *
-     */
     private defaultChunkSize = 65536
-
-    /**
-     *
-     */
-    private nextPosition = 0
 
     /**
      *
@@ -105,48 +90,6 @@ export class File {
 
     /**
      *
-     * @param position
-     */
-    private async readSubsequentLine(position: number | null = null) {
-        if(position !== null) {
-            this.currentBlockLines = []
-            this.currentPartialLine = ""
-            this.nextPosition = position
-        }
-        if(!this.currentBlockLines.length) {
-            const read = util.promisify(fs.read)
-            const chunkSize = this.defaultChunkSize
-            const buffer = Buffer.alloc(chunkSize)
-            let i = 0
-            do {
-                const result = await read(this.filehandle, buffer, 0, chunkSize, this.nextPosition)
-                if(result.bytesRead == 0) {
-                    if(this.currentPartialLine.length) {
-                        const line = this.currentPartialLine
-                        this.currentPartialLine = ""
-                        return line
-                    } else {
-                        return null
-                    }
-                }
-                const contents = this.currentPartialLine + buffer.toString("utf8", 0, result.bytesRead)
-                const lines = contents.split(this.capturingLineEnding).filter(
-                    (line, i) => i % 2 == 0 // Odd positions only
-                )
-                if(i == 0 && this.nextPosition > 0) {
-                    lines.shift()
-                }
-                this.nextPosition += result.bytesRead
-                i++
-                this.currentPartialLine = lines.pop() || ""
-                this.currentBlockLines = lines
-            } while(this.currentBlockLines.length == 0)
-        }
-        return this.currentBlockLines.shift()!
-    }
-
-    /**
-     *
      */
     async *read() {
         const lastLineRelativePosition = await this.lastLineRelativePosition()
@@ -198,10 +141,29 @@ export class File {
     }
 
     private async firstLineRelativePosition() {
-        const line = await this.readSubsequentLine(0)
-        if(line === null) {
-            throw new Error(`Unable to find first line of ${this.filename}`)
-        }
+        let currentPartialLine = ""
+        let nextPosition = 0
+        const read = util.promisify(fs.read)
+        const chunkSize = this.defaultChunkSize
+        const buffer = Buffer.alloc(chunkSize)
+        let line: string | undefined
+        do {
+            const result = await read(this.filehandle, buffer, 0, chunkSize, nextPosition)
+            if(result.bytesRead == 0) {
+                if(currentPartialLine.length) {
+                    line = currentPartialLine
+                    break
+                } else {
+                    throw new Error(`Unable to find first line of ${this.filename}`)
+                }
+            }
+            const contents = currentPartialLine + buffer.toString("utf8", 0, result.bytesRead)
+            const lines = contents.split(this.capturingLineEnding)
+            nextPosition += result.bytesRead
+            currentPartialLine = lines.pop() || ""
+            line = lines.shift()
+        } while(!line)
+
         return this.lineCheck(line)
     }
 
