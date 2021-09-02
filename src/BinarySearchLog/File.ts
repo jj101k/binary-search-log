@@ -54,9 +54,9 @@ export class File {
             const buffer = Buffer.alloc(chunkSize)
             const result = await read(this.filehandle, buffer, 0, chunkSize, testPosition)
             const contents = this.currentPartialLine + buffer.toString("utf8", 0, result.bytesRead)
-            const lines = contents.split(this.lineEnding, 2)
-            if(lines.length > 1) {
-                const state = this.lineCheck(lines[1])
+            const lines = contents.split(this.capturingLineEnding, 3)
+            if(lines.length > 2) {
+                const state = this.lineCheck(lines[2])
                 if(lookEarlier(state)) {
                     after = testPosition
                 } else {
@@ -81,13 +81,13 @@ export class File {
      * 1 for lines after the intended range, and 0 for lines in range
      * @param filename
      * @param filehandle
-     * @param lineEnding
+     * @param capturingLineEnding
      */
     constructor(
         private lineCheck: (line: string) => number,
         private filename: string,
         protected filehandle: number,
-        private lineEnding: RegExp = UNIXLine,
+        private capturingLineEnding: RegExp = UNIXLine,
     ) {
     }
 
@@ -118,7 +118,9 @@ export class File {
                     }
                 }
                 const contents = this.currentPartialLine + buffer.toString("utf8", 0, result.bytesRead)
-                const lines = contents.split(this.lineEnding)
+                const lines = contents.split(this.capturingLineEnding).filter(
+                    (line, i) => i % 2 == 0 // Odd positions only
+                )
                 if(i == 0 && this.nextPosition > 0) {
                     lines.shift()
                 }
