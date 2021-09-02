@@ -187,7 +187,8 @@ export class File {
         let chunkSize = lastLineEstimatedLength
         do {
             const buffer = Buffer.alloc(chunkSize)
-            const result = await read(this.filehandle, buffer, 0, chunkSize, Math.max(this.fileLength - 1 - chunkSize, 0))
+            const offset = Math.max(this.fileLength - chunkSize, 0)
+            const result = await read(this.filehandle, buffer, 0, chunkSize, offset)
             const contents = this.currentPartialLine + buffer.toString("utf8", 0, result.bytesRead)
             const lines = contents.split(this.capturingLineEnding, 3)
             if(lines.length > 2) {
