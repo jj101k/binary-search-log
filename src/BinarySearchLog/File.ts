@@ -189,9 +189,9 @@ export class File {
             const buffer = Buffer.alloc(chunkSize)
             const result = await read(this.filehandle, buffer, 0, chunkSize, Math.max(this.fileLength - 1 - chunkSize, 0))
             const contents = this.currentPartialLine + buffer.toString("utf8", 0, result.bytesRead)
-            let md: RegExpMatchArray | null
-            if(md = contents.match(/\n(.+\n?)$/)) {
-                return this.lineCheck(md[1])
+            const lines = contents.split(this.capturingLineEnding, 3)
+            if(lines.length > 2) {
+                return this.lineCheck(lines[2])
             }
             chunkSize *= 2
         } while(chunkSize < this.fileLength * 2)
