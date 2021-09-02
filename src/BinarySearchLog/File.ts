@@ -73,7 +73,7 @@ export class File {
                 }
             }
         } while(after > before + 1)
-        return before
+        return after
     }
 
     /**
