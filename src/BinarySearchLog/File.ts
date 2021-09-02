@@ -53,7 +53,7 @@ export class File {
             testPosition = Math.round((before + after) / 2)
             const buffer = Buffer.alloc(chunkSize)
             const result = await read(this.filehandle, buffer, 0, chunkSize, testPosition)
-            const contents = this.currentPartialLine + buffer.toString("utf8", 0, result.bytesRead)
+            const contents = buffer.toString("utf8", 0, result.bytesRead)
             const lines = contents.split(this.capturingLineEnding, 3)
             if(lines.length > 2) {
                 const state = this.lineCheck(lines[2])
@@ -81,7 +81,7 @@ export class File {
         const position = after
         const buffer = Buffer.alloc(chunkSize)
         const result = await read(this.filehandle, buffer, 0, chunkSize, position)
-        const contents = this.currentPartialLine + buffer.toString("utf8", 0, result.bytesRead)
+        const contents = buffer.toString("utf8", 0, result.bytesRead)
         const lines = contents.split(this.capturingLineEnding, 2)
 
         return position + lines[0].length + lines[1].length
@@ -214,7 +214,7 @@ export class File {
             const buffer = Buffer.alloc(chunkSize)
             const offset = Math.max(this.fileLength - chunkSize, 0)
             const result = await read(this.filehandle, buffer, 0, chunkSize, offset)
-            const contents = this.currentPartialLine + buffer.toString("utf8", 0, result.bytesRead)
+            const contents = buffer.toString("utf8", 0, result.bytesRead)
             const lines = contents.split(this.capturingLineEnding)
             if(lines.length > 2) {
                 return this.lineCheck(lines[lines.length - 1] || lines[lines.length - 3])
