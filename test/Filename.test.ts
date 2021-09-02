@@ -1,8 +1,5 @@
 import assert from "assert"
-import * as fs from "fs"
-import {before, describe, it, Test} from "mocha"
-import {sep} from "path"
-import * as os from "os"
+import {before, describe, it} from "mocha"
 
 import { Filename } from "../index"
 import { TestLogFileData } from "./src/TestLogFileData"
