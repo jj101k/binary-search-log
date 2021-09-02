@@ -1,4 +1,5 @@
 import * as fs from "fs"
+import { EOLPattern } from "."
 import { File } from "./File"
 export class Filename extends File {
     /**
@@ -12,7 +13,7 @@ export class Filename extends File {
     constructor(
         lineCheck: (line: string) => number,
         filename: string,
-        lineEnding: RegExp = /\n/,
+        lineEnding: RegExp = EOLPattern.UNIXLine,
     ) {
         super(
             lineCheck,
