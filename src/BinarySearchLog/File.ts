@@ -5,12 +5,17 @@ export class File {
     /**
      *
      */
-    private buffer: Buffer | undefined
+    private buffer: Buffer
 
     /**
      *
      */
-    private defaultChunkSize = 65536
+    private readonly defaultChunkSize = 65536
+
+    /**
+     *
+     */
+    private readonly maxLineLength = 1024 * 1024
 
     /**
      *
@@ -37,26 +42,14 @@ export class File {
         let before = -1
         let after = this.fileLength
         let testPosition: number
-        let chunkSize = this.defaultChunkSize
         do {
             testPosition = Math.round((before + after) / 2)
-            const contents = await this.readString(chunkSize, testPosition)
-            const lines = contents.split(this.capturingLineEnding, 3)
-            if(lines.length > 2) {
-                const state = this.lineCheck(lines[2])
-                if(lookEarlier(state)) {
-                    after = testPosition
-                } else {
-                    before = testPosition
-                }
-                chunkSize = this.defaultChunkSize
+            const line = await this.readFirstLineForwards(testPosition)
+            const state = this.lineCheck(line)
+            if(lookEarlier(state)) {
+                after = testPosition
             } else {
-                if(testPosition + chunkSize > this.fileLength) {
-                    after = testPosition
-                    chunkSize = this.defaultChunkSize
-                } else {
-                    chunkSize *= 2
-                }
+                before = testPosition
             }
         } while(after > before + 1)
 
@@ -66,7 +59,7 @@ export class File {
          */
 
         const position = after
-        const contents = await this.readString(chunkSize, position)
+        const contents = await this.readString(position)
         const lines = contents.split(this.capturingLineEnding, 2)
 
         return position + lines[0].length + lines[1].length
@@ -74,30 +67,64 @@ export class File {
 
     /**
      *
-     * @param size
      * @param position
      * @returns
      */
-    private readData(size: number, position: number) {
-        if(
-            !this.buffer ||
-            this.buffer.length < size ||
-            this.buffer.length > Math.max(size * 2, this.defaultChunkSize)
-        ) {
-            this.buffer = Buffer.alloc(size)
-        }
-        const read = util.promisify(fs.read)
-        return read(this.filehandle, this.buffer, 0, size, position)
+    private async readFirstLineForwards(position: number) {
+        let currentPartialLine = ""
+        do {
+            const offset = position + currentPartialLine.length
+            const contents = await this.readString(offset)
+            if(!contents) {
+                return currentPartialLine
+            }
+            currentPartialLine += contents
+            const lines = currentPartialLine.split(this.capturingLineEnding)
+            if(lines.length > 1 && position == 0) {
+                return lines[0]
+            } else if(lines.length > 3) {
+                return lines[2]
+            }
+        } while(currentPartialLine.length < this.maxLineLength)
+        throw new Error("Maximum line length exceeded")
     }
 
     /**
      *
-     * @param size
      * @param position
      * @returns
      */
-    private async readString(size: number, position: number) {
-        const result = await this.readData(size, position)
+    private async readLastLineBackwards(position: number) {
+        let currentPartialLine = ""
+        const chunkSize = this.defaultChunkSize
+        do {
+            const targetOffset = position - currentPartialLine.length - chunkSize
+            let contents: string
+            if(targetOffset >= 0) {
+                contents = await this.readString(targetOffset, chunkSize)
+            } else {
+                contents = await this.readString(0, chunkSize + targetOffset)
+            }
+            currentPartialLine = contents + currentPartialLine
+            const lines = currentPartialLine.split(this.capturingLineEnding)
+            if(lines.length > 2) {
+                return lines[lines.length - 1] || lines[lines.length - 3]
+            } else if(targetOffset <= 0) {
+                return lines[0]
+            }
+        } while(currentPartialLine.length < this.maxLineLength)
+        throw new Error("Maximum line length exceeded")
+    }
+
+    /**
+     *
+     * @param position
+     * @param size
+     * @returns
+     */
+    private async readString(position: number, size = this.defaultChunkSize) {
+        const read = util.promisify(fs.read)
+        const result = await read(this.filehandle, this.buffer, 0, size, position)
         return result.buffer.toString("utf8", 0, result.bytesRead)
     }
 
@@ -115,6 +142,7 @@ export class File {
         protected filehandle: number,
         private capturingLineEnding: RegExp = UNIXLine,
     ) {
+        this.buffer = Buffer.alloc(this.defaultChunkSize)
     }
 
     /**
@@ -153,7 +181,7 @@ export class File {
 
         for(let pos = fromPosition; pos < toPosition; pos += chunkSize) {
             const size = Math.min(toPosition, pos + chunkSize) - pos
-            yield await this.readString(size, pos)
+            yield await this.readString(pos, size)
         }
     }
 
@@ -173,43 +201,14 @@ export class File {
     }
 
     private async firstLineRelativePosition() {
-        let currentPartialLine = ""
-        let nextPosition = 0
-        const chunkSize = this.defaultChunkSize
-        let line: string | undefined
-        do {
-            const result = await this.readData(chunkSize, nextPosition)
-            if(result.bytesRead == 0) {
-                if(currentPartialLine.length) {
-                    line = currentPartialLine
-                    break
-                } else {
-                    throw new Error(`Unable to find first line of ${this.filename}`)
-                }
-            }
-            const contents = currentPartialLine + result.buffer.toString("utf8", 0, result.bytesRead)
-            const lines = contents.split(this.capturingLineEnding)
-            nextPosition += result.bytesRead
-            currentPartialLine = lines.pop() || ""
-            line = lines.shift()
-        } while(!line)
-
-        return this.lineCheck(line)
+        const firstLine = await this.readFirstLineForwards(0)
+        if(!firstLine) {
+            throw new Error(`Unable to find first line of ${this.filename}`)
+        }
+        return this.lineCheck(firstLine)
     }
 
     private async lastLineRelativePosition() {
-        const lastLineEstimatedLength = 1024
-
-        let chunkSize = lastLineEstimatedLength
-        do {
-            const offset = Math.max(this.fileLength - chunkSize, 0)
-            const contents = await this.readString(chunkSize, offset)
-            const lines = contents.split(this.capturingLineEnding)
-            if(lines.length > 2) {
-                return this.lineCheck(lines[lines.length - 1] || lines[lines.length - 3])
-            }
-            chunkSize *= 2
-        } while(chunkSize < this.fileLength * 2)
-        throw new Error(`Unable to find last line of ${this.filename}`)
+        return this.lineCheck(await this.readLastLineBackwards(this.fileLength))
     }
 }
