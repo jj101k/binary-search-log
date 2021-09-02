@@ -118,7 +118,7 @@ export class File {
     }
 
     /**
-     *
+     * This reads all the lines in range, as a series of blocks
      */
     async *read() {
         const lastLineRelativePosition = await this.lastLineRelativePosition()
@@ -149,20 +149,26 @@ export class File {
             fromPosition = 0
         }
 
-        let remaining = ""
         const chunkSize = this.defaultChunkSize
 
         for(let pos = fromPosition; pos < toPosition; pos += chunkSize) {
             const size = Math.min(toPosition, pos + chunkSize) - pos
-            const contents = remaining + await this.readString(size, pos)
+            yield await this.readString(size, pos)
+        }
+    }
+
+    /**
+     * This reads all the lines in range, as a series of lines
+     */
+    async *readLines() {
+        let remaining = ""
+        for await (const block of this.read()) {
+            const contents = remaining + block
             const lines = contents.split(this.capturingLineEnding)
             remaining = lines.pop() ?? ""
             for(let i = 0; i < lines.length; i += 2) {
                 yield lines[i] + lines[i + 1]
             }
-        }
-        if(remaining != "") {
-            yield remaining
         }
     }
 

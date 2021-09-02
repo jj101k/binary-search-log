@@ -17,7 +17,7 @@ describe("File tests", () => {
             example1To100LogFile
         )
         let seenLines = 0
-        for await(const line of file.read()) {
+        for await(const line of file.readLines()) {
             seenLines++
         }
         file.finish()
@@ -34,7 +34,7 @@ describe("File tests", () => {
             example1To100LogFile
         )
         let seenLines = 0
-        for await(const line of file.read()) {
+        for await(const line of file.readLines()) {
             assert.match(line, /^(?:[1-2]?[0-9]|30) /, `Line ${line} is in range`)
             seenLines++
         }
@@ -52,7 +52,7 @@ describe("File tests", () => {
             example1To100LogFile
         )
         let seenLines = 0
-        for await(const line of file.read()) {
+        for await(const line of file.readLines()) {
             assert.match(line, /^(?:[6-9]?[0-9]|100) /, `Line ${line} is in range`)
             seenLines++
         }
@@ -70,7 +70,7 @@ describe("File tests", () => {
             example1To100LogFile
         )
         let seenLines = 0
-        for await(const line of file.read()) {
+        for await(const line of file.readLines()) {
             assert.match(line, /^(?:1[0-9]|20) /, `Line ${line} is in range`)
             seenLines++
         }
@@ -97,7 +97,7 @@ describe("File tests", () => {
             )
             let seenLines = 0
             const start = new Date()
-            for await(const line of file.read()) {
+            for await(const line of file.readLines()) {
                 const timestamp = +line.replace(/ .*/, "")
                 assert(timestamp >= largeLogFileLines / 2 + 10 && timestamp <= largeLogFileLines / 2 + 20)
                 seenLines++

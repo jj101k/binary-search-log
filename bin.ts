@@ -20,8 +20,8 @@ const file = new Filename(
     EOLPattern.FoldedLine
 )
 const getLines = async () => {
-    for await (const line of file.read()) {
-        process.stdout.write(line)
+    for await (const block of file.read()) {
+        process.stdout.write(block)
     }
     file.finish()
 }
