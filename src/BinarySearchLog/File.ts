@@ -72,7 +72,19 @@ export class File {
                 }
             }
         } while(after > before + 1)
-        return after
+
+        /*
+         * @todo this should really filter to the line offsets and instead abort
+         * once there is only one line boundary left
+         */
+
+        const position = after
+        const buffer = Buffer.alloc(chunkSize)
+        const result = await read(this.filehandle, buffer, 0, chunkSize, position)
+        const contents = this.currentPartialLine + buffer.toString("utf8", 0, result.bytesRead)
+        const lines = contents.split(this.capturingLineEnding, 2)
+
+        return position + lines[0].length + lines[1].length
     }
 
     /**
