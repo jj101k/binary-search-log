@@ -192,7 +192,7 @@ export class File {
             const contents = this.currentPartialLine + buffer.toString("utf8", 0, result.bytesRead)
             const lines = contents.split(this.capturingLineEnding)
             if(lines.length > 2) {
-                return this.lineCheck(lines[lines.length - 1])
+                return this.lineCheck(lines[lines.length - 1] || lines[lines.length - 3])
             }
             chunkSize *= 2
         } while(chunkSize < this.fileLength * 2)
