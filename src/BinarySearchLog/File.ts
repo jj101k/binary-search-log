@@ -44,7 +44,6 @@ export class File {
      * @returns
      */
     private async findPosition(lookEarlier: (r: number) => boolean) {
-        // Find start
         const read = util.promisify(fs.read)
         let before = -1
         let after = this.fileLength
