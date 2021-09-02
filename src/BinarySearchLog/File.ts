@@ -24,6 +24,60 @@ export class File {
 
     /**
      *
+     */
+    private cachedFileLength: number | null = null
+
+    /**
+     *
+     */
+    private get fileLength() {
+        if(this.cachedFileLength === null) {
+            const stat = fs.fstatSync(this.filehandle)
+            this.cachedFileLength = stat.size
+        }
+        return this.cachedFileLength
+    }
+
+    /**
+     *
+     * @param lookEarlier
+     * @returns
+     */
+    private async findPosition(lookEarlier: (r: number) => boolean) {
+        // Find start
+        const read = util.promisify(fs.read)
+        let before = -1
+        let after = this.fileLength
+        let testPosition: number
+        let chunkSize = this.defaultChunkSize
+        do {
+            testPosition = Math.round((before + after) / 2)
+            const buffer = Buffer.alloc(chunkSize)
+            const result = await read(this.filehandle, buffer, 0, chunkSize, testPosition)
+            const contents = this.currentPartialLine + buffer.toString("utf8", 0, result.bytesRead)
+            const lines = contents.split(this.lineEnding, 2)
+            if(lines.length > 1) {
+                const state = this.lineCheck(lines[1])
+                if(lookEarlier(state)) {
+                    after = testPosition
+                } else {
+                    before = testPosition
+                }
+                chunkSize = this.defaultChunkSize
+            } else {
+                if(testPosition + chunkSize > this.fileLength) {
+                    after = testPosition
+                    chunkSize = this.defaultChunkSize
+                } else {
+                    chunkSize *= 2
+                }
+            }
+        } while(after > before + 1)
+        return before
+    }
+
+    /**
+     *
      * @param lineCheck This must return -1 for lines before the intended range,
      * 1 for lines after the intended range, and 0 for lines in range
      * @param filename
@@ -95,37 +149,7 @@ export class File {
         let fromPosition: number | null
         if(firstLinePosition < 0) {
             // Find start
-            const stat = fs.fstatSync(this.filehandle)
-
-            const read = util.promisify(fs.read)
-            let before = -1
-            let after = stat.size
-            let testPosition: number
-            let chunkSize = this.defaultChunkSize
-            do {
-                testPosition = Math.round((before + after) / 2)
-                const buffer = Buffer.alloc(chunkSize)
-                const result = await read(this.filehandle, buffer, 0, chunkSize, testPosition)
-                const contents = this.currentPartialLine + buffer.toString("utf8", 0, result.bytesRead)
-                const lines = contents.split(this.lineEnding, 2)
-                if(lines.length > 1) {
-                    const state = this.lineCheck(lines[1])
-                    if(state >= 0) {
-                        after = testPosition
-                    } else {
-                        before = testPosition
-                    }
-                    chunkSize = this.defaultChunkSize
-                } else {
-                    if(testPosition + chunkSize > stat.size) {
-                        after = testPosition
-                        chunkSize = this.defaultChunkSize
-                    } else {
-                        chunkSize *= 2
-                    }
-                }
-            } while(after > before + 1)
-            fromPosition = before
+            fromPosition = await this.findPosition(state => state >= 0)
         } else {
             // Start from zero
             fromPosition = 0
@@ -157,20 +181,19 @@ export class File {
 
     private async lastLineRelativePosition() {
         const lastLineEstimatedLength = 1024
-        const stat = fs.fstatSync(this.filehandle)
 
         const read = util.promisify(fs.read)
         let chunkSize = lastLineEstimatedLength
         do {
             const buffer = Buffer.alloc(chunkSize)
-            const result = await read(this.filehandle, buffer, 0, chunkSize, Math.max(stat.size - 1 - chunkSize, 0))
+            const result = await read(this.filehandle, buffer, 0, chunkSize, Math.max(this.fileLength - 1 - chunkSize, 0))
             const contents = this.currentPartialLine + buffer.toString("utf8", 0, result.bytesRead)
             let md: RegExpMatchArray | null
             if(md = contents.match(/\n(.+\n?)$/)) {
                 return this.lineCheck(md[1])
             }
             chunkSize *= 2
-        } while(chunkSize < stat.size * 2)
+        } while(chunkSize < this.fileLength * 2)
         throw new Error(`Unable to find last line of ${this.filename}`)
     }
 }
