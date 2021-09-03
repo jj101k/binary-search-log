@@ -1,12 +1,8 @@
-export class DateSearcher {
-    /**
-     *
-     * @param linePattern
-     * @param sanitise
-     */
-    constructor(public linePattern: RegExp, private sanitise: (dateString: string) => string) {
+export abstract class Base {
+    abstract linePattern: RegExp
 
-    }
+    protected abstract sanitise(dateString: string): string
+
     /**
      *
      * @param low

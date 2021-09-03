@@ -1,1 +1,0 @@
-export const Syslog = /^(\w\w\w [ \d]\d \d\d:\d\d:\d\d)/
