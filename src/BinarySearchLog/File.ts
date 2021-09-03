@@ -216,5 +216,8 @@ export class File {
                 yield lines[i] + lines[i + 1]
             }
         }
+        if(remaining != "") {
+            yield remaining
+        }
     }
 }
