@@ -96,15 +96,10 @@ export class File {
      */
     private async readLastLineBackwards(position: number) {
         let currentPartialLine = ""
-        const chunkSize = this.defaultChunkSize
         do {
-            const targetOffset = position - currentPartialLine.length - chunkSize
-            let contents: string
-            if(targetOffset >= 0) {
-                contents = await this.readString(targetOffset, chunkSize)
-            } else {
-                contents = await this.readString(0, chunkSize + targetOffset)
-            }
+            const targetOffset = position - currentPartialLine.length - this.defaultChunkSize
+            const contents = await this.readString(targetOffset)
+
             currentPartialLine = contents + currentPartialLine
             const lines = currentPartialLine.split(this.capturingLineEnding)
             if(lines.length > 2) {
@@ -117,12 +112,31 @@ export class File {
     }
 
     /**
+     * Reads from the file.
      *
-     * @param position
-     * @param size
+     * If you supply a negative offset, this will read as if it were literally
+     * taking one block from there (ie, a short read) - this is to simplify
+     * walking backwards.
+     *
+     * If you supply a finish-before position, the read will also be short -
+     * this is to simplify walking forwards.
+     *
+     * @param startPosition This can be negative as noted above
+     * @param finishBeforePosition The read will stop before this point
      * @returns
      */
-    private async readString(position: number, size = this.defaultChunkSize) {
+    private async readString(startPosition: number, finishBeforePosition: number | null = null) {
+        let position: number
+        let size: number
+        if(startPosition >= 0) {
+            position = startPosition
+            size = finishBeforePosition === null ?
+                this.defaultChunkSize :
+                (Math.min(finishBeforePosition, startPosition + this.defaultChunkSize) - startPosition)
+        } else {
+            position = 0
+            size = startPosition + this.defaultChunkSize
+        }
         const read = util.promisify(fs.read)
         const result = await read(this.filehandle, this.buffer, 0, size, position)
         return result.buffer.toString("utf8", 0, result.bytesRead)
@@ -181,12 +195,12 @@ export class File {
             fromPosition = 0
         }
 
-        const chunkSize = this.defaultChunkSize
-
-        for(let pos = fromPosition; pos < toPosition; pos += chunkSize) {
-            const size = Math.min(toPosition, pos + chunkSize) - pos
-            yield await this.readString(pos, size)
-        }
+        let pos = fromPosition
+        do {
+            const block = await this.readString(pos, toPosition)
+            yield block
+            pos += block.length
+        } while(pos < toPosition)
     }
 
     /**
