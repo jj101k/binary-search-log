@@ -41,28 +41,30 @@ export class File {
     private async findPosition(lookEarlier: (r: number) => boolean) {
         let before = -1
         let after = this.fileLength
-        let testPosition: number
+        let testPosition = Math.round((before + after) / 2)
         do {
-            testPosition = Math.round((before + after) / 2)
-            const {line: line} = await this.firstLineInfoForwards(testPosition)
-            const state = this.lineCheck(line)
-            if(lookEarlier(state)) {
-                after = testPosition
+            const lineInfo = await this.firstLineInfoForwards(testPosition, after + 1)
+            if(!lineInfo.line) {
+                if(before + 1 == testPosition) {
+                    // No detected line, no further revision possible
+                    break
+                } else {
+                    // No detected line, look earlier but keep after position
+                    testPosition = Math.round((before + testPosition) / 2)
+                }
             } else {
-                before = testPosition
+                testPosition += lineInfo.offset
+                const state = this.lineCheck(lineInfo.line)
+                if(lookEarlier(state)) {
+                    after = testPosition
+                } else {
+                    before = testPosition
+                }
+                testPosition = Math.round((before + after) / 2)
             }
         } while(after > before + 1)
 
-        /*
-         * @todo this should really filter to the line offsets and instead abort
-         * once there is only one line boundary left
-         */
-
-        const position = after
-        const contents = await this.readString(position)
-        const lines = contents.split(this.capturingLineEnding, 2)
-
-        return position + lines[0].length + lines[1].length
+        return after
     }
 
     /**
