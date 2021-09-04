@@ -44,7 +44,7 @@ export class File {
         let testPosition: number
         do {
             testPosition = Math.round((before + after) / 2)
-            const line = await this.readFirstLineForwards(testPosition)
+            const {line: line} = await this.firstLineInfoForwards(testPosition)
             const state = this.lineCheck(line)
             if(lookEarlier(state)) {
                 after = testPosition
@@ -70,20 +70,26 @@ export class File {
      * @param position
      * @returns
      */
-    private async readFirstLineForwards(position: number) {
+    private async firstLineInfoForwards(position: number) {
         let currentPartialLine = ""
         do {
             const offset = position + currentPartialLine.length
             const contents = await this.readString(offset)
             if(!contents) {
-                return currentPartialLine
+                return {
+                    line: currentPartialLine,
+                }
             }
             currentPartialLine += contents
             const lines = currentPartialLine.split(this.capturingLineEnding)
             if(lines.length > 1 && position == 0) {
-                return lines[0]
+                return {
+                    line: lines[0],
+                }
             } else if(lines.length > 3) {
-                return lines[2]
+                return {
+                    line: lines[2],
+                }
             }
         } while(currentPartialLine.length < this.maxLineLength)
         throw new Error("Maximum line length exceeded")
@@ -168,7 +174,7 @@ export class File {
             console.info(`Last line is before range in ${this.filename}`)
             return
         }
-        const firstLine = await this.readFirstLineForwards(0)
+        const {line: firstLine} = await this.firstLineInfoForwards(0)
         if(!firstLine) {
             throw new Error(`Unable to find first line of ${this.filename}`)
         }
