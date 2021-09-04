@@ -68,17 +68,18 @@ export class File {
     /**
      *
      * @param position
+     * @param finishBeforePosition
      * @returns
      */
-    private async firstLineInfoForwards(position: number) {
+    private async firstLineInfoForwards(position: number, finishBeforePosition: number | null = null) {
         let currentPartialLine = ""
         do {
             const offset = position + currentPartialLine.length
-            const contents = await this.readString(offset)
+            const contents = await this.readString(offset, finishBeforePosition)
             if(!contents) {
                 return {
                     offset: 0,
-                    line: currentPartialLine,
+                    line: (offset == this.fileLength - 1) ? currentPartialLine : "",
                 }
             }
             currentPartialLine += contents
