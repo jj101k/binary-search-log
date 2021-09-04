@@ -44,7 +44,7 @@ export class File {
         let testPosition = Math.round((before + after) / 2)
         do {
             const lineInfo = await this.firstLineInfoForwards(testPosition, after + 1)
-            if(!lineInfo.line) {
+            if(lineInfo.line === null) {
                 if(before + 1 == testPosition) {
                     // No detected line, no further revision possible
                     break
@@ -81,7 +81,7 @@ export class File {
             if(!contents) {
                 return {
                     offset: 0,
-                    line: (offset == this.fileLength - 1) ? currentPartialLine : "",
+                    line: (offset == this.fileLength - 1) ? currentPartialLine : null,
                 }
             }
             currentPartialLine += contents
@@ -181,7 +181,7 @@ export class File {
             return
         }
         const {line: firstLine} = await this.firstLineInfoForwards(0)
-        if(!firstLine) {
+        if(firstLine === null) {
             throw new Error(`Unable to find first line of ${this.filename}`)
         }
         const firstLinePosition = this.lineCheck(firstLine)
