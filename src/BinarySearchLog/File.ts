@@ -177,7 +177,7 @@ export class File {
     async *read() {
         const lastLineRelativePosition = this.lineCheck(await this.readLastLineBackwards(this.fileLength))
         if(lastLineRelativePosition < 0) {
-            console.info(`Last line is before range in ${this.filename}`)
+            // Last line is before range
             return
         }
         const {line: firstLine} = await this.firstLineInfoForwards(0)
@@ -186,7 +186,7 @@ export class File {
         }
         const firstLinePosition = this.lineCheck(firstLine)
         if(firstLinePosition > 0) {
-            console.info(`First line is after range in ${this.filename}`)
+            // First line is after range
             return
         }
 
