@@ -19,6 +19,11 @@ export abstract class File {
 
     /**
      *
+     */
+    private openedFile: boolean
+
+    /**
+     *
      * @param lookEarlier
      * @returns
      */
@@ -121,14 +126,22 @@ export abstract class File {
         filehandle: number | null = null,
     ) {
         this.buffer = Buffer.alloc(this.defaultChunkSize)
-        this.filehandle = filehandle || fs.openSync(this.filename, "r")
+        if(filehandle) {
+            this.filehandle = filehandle
+            this.openedFile = false
+        } else {
+            this.filehandle = fs.openSync(this.filename, "r")
+            this.openedFile = true
+        }
     }
 
     /**
      * Releases the filehandle
      */
     finish() {
-        fs.close(this.filehandle)
+        if(this.openedFile) {
+            fs.close(this.filehandle)
+        }
     }
 
     /**
