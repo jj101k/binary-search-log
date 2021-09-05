@@ -1,8 +1,8 @@
 import * as fs from "fs"
 import * as util from "util"
-import { DateSearcher } from "."
-import { UNIXLine } from "./EOLPattern"
-export abstract class File {
+import { DateSearcher } from ".."
+import { UNIXLine } from "../EOLPattern"
+export abstract class Base {
     /**
      *
      */

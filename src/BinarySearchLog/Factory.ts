@@ -1,4 +1,4 @@
-import { DateSearcher, FileByByte, FileByLine } from ".";
+import { DateSearcher, LineFinder } from ".";
 
 export class Factory {
     /**
@@ -21,8 +21,8 @@ export class Factory {
      */
     public static getLineFinder(by: "byte" | "line" = "line") {
         const lineFinder = {
-            byte: FileByByte,
-            line: FileByLine,
+            byte: LineFinder.ByByte,
+            line: LineFinder.ByLine,
         }
         return lineFinder[by]
     }

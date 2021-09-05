@@ -11,11 +11,11 @@ if(isNaN(high.valueOf())) {
     throw new Error(`Date "${highString}" is invalid`)
 }
 const dateSearcher = Factory.getDateSearcher("syslog")
-const dateSearcherInstance = new dateSearcher(low)
+const dateSearcherInstance = new dateSearcher(low, high)
 const lineFinder = Factory.getLineFinder()
 
 const file = new lineFinder(
-    dateSearcherInstance.lineHandler(low, high),
+    dateSearcherInstance,
     filename,
     EOLPattern.FoldedLine
 )

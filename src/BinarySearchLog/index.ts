@@ -1,6 +1,4 @@
 export * as DateSearcher from "./DateSearcher"
 export * as EOLPattern from "./EOLPattern"
 export * from "./Factory"
-export * from "./File"
-export * from "./FileByByte"
-export * from "./FileByLine"
+export * as LineFinder from "./LineFinder"

@@ -1,13 +1,12 @@
 import assert from "assert"
 import {before, describe, it} from "mocha"
-
-import { Factory } from "../index"
-import { TestLogFileData } from "./src/TestLogFileData"
+import { Factory } from "../../index"
+import { TestLogFileData } from "../src/TestLogFileData"
 
 describe("File-by-line tests", () => {
     const lineFinder = Factory.getLineFinder("line")
     const dateSearcher = Factory.getDateSearcher("startingTimestamp")
-    const example1To100LogFile = __dirname + "/data/range1-100.log.example"
+    const example1To100LogFile = __dirname + "/../data/range1-100.log.example"
     it("Can skip out-of-range files", async () => {
         const file = new lineFinder(
             new dateSearcher(new Date(1000), new Date(3000)),
