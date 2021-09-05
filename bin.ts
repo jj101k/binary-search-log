@@ -23,4 +23,9 @@ const getLines = async () => {
     file.finish()
 }
 
-getLines()
+const start = new Date()
+
+getLines().then(() => {
+    const finish = new Date()
+    console.log(`Took ${finish.valueOf() - start.valueOf()}ms`)
+})
