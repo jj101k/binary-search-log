@@ -1,34 +1,28 @@
 export abstract class Base {
     abstract linePattern: RegExp
 
-    protected abstract sanitise(dateString: string): string
+    /**
+     *
+     */
+    protected referenceDate: Date
 
     /**
      *
+     * @param lowBound
+     * @param highBound
      * @param referenceDate
      */
-    constructor(protected referenceDate: Date) {
+    constructor(protected lowBound: Date, protected highBound: Date, referenceDate?: Date) {
+        this.referenceDate = referenceDate ?? lowBound
     }
 
     /**
+     * This must return -1 for lines before the intended range,
+     * 1 for lines after the intended range, and 0 for lines in range
      *
-     * @param low
-     * @param high
+     * @param line
+     * @throws
      * @returns
      */
-    lineHandler(low: Date, high: Date) {
-        return (line: string) => {
-            let md
-            if(md = line.match(this.linePattern)) {
-                const d = new Date(this.sanitise(md[1]))
-                if(d < low) {
-                    return -1
-                } else if(d > high) {
-                    return 1
-                }
-                return 0
-            }
-            throw new Error(`Unable to parse date on: "${line}"`)
-        }
-    }
+    abstract getRelativeLinePosition(line: string): number
 }

@@ -1,6 +1,6 @@
-import { Base } from "./Base"
+import { DateBase } from "./DateBase"
 
-export class Syslog extends Base {
+export class Syslog extends DateBase {
     /**
      *
      */

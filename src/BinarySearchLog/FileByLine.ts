@@ -21,7 +21,7 @@ export class FileByLine extends File {
                 }
             } else {
                 testPosition += lineInfo.offset
-                const state = this.lineCheck(lineInfo.line)
+                const state = this.dateSearcher.getRelativeLinePosition(lineInfo.line)
                 if(lookEarlier(state)) {
                     after = testPosition
                 } else {

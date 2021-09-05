@@ -6,15 +6,11 @@ import { TestLogFileData } from "./src/TestLogFileData"
 
 describe("File-by-byte tests", () => {
     const lineFinder = Factory.getLineFinder("byte")
+    const dateSearcher = Factory.getDateSearcher("startingTimestamp")
     const example1To100LogFile = __dirname + "/data/range1-100.log.example"
     it("Can skip out-of-range files", async () => {
         const file = new lineFinder(
-            line => {
-                const n = +(line.split(/ /)[0])
-                if(n < 1000) return -1
-                else if(n > 3000) return 1
-                else return 0
-            },
+            new dateSearcher(new Date(1000), new Date(3000)),
             example1To100LogFile
         )
         let seenLines = 0
@@ -26,12 +22,7 @@ describe("File-by-byte tests", () => {
     })
     it("Can read in-range files (start)", async () => {
         const file = new lineFinder(
-            line => {
-                const n = +(line.split(/ /)[0])
-                if(n < -10) return -1
-                else if(n > 30) return 1
-                else return 0
-            },
+            new dateSearcher(new Date(-10), new Date(30)),
             example1To100LogFile
         )
         let seenLines = 0
@@ -44,12 +35,7 @@ describe("File-by-byte tests", () => {
     })
     it("Can read in-range files (finish)", async () => {
         const file = new lineFinder(
-            line => {
-                const n = +(line.split(/ /)[0])
-                if(n < 60) return -1
-                else if(n > 110) return 1
-                else return 0
-            },
+            new dateSearcher(new Date(60), new Date(110)),
             example1To100LogFile
         )
         let seenLines = 0
@@ -62,12 +48,7 @@ describe("File-by-byte tests", () => {
     })
     it("Can read in-range files (middle)", async () => {
         const file = new lineFinder(
-            line => {
-                const n = +(line.split(/ /)[0])
-                if(n < 10) return -1
-                else if(n > 20) return 1
-                else return 0
-            },
+            new dateSearcher(new Date(10), new Date(20)),
             example1To100LogFile
         )
         let seenLines = 0
@@ -88,12 +69,10 @@ describe("File-by-byte tests", () => {
         it("Can read in-range files (middle, large)", async function() {
             this.timeout(20)
             const file = new lineFinder(
-                line => {
-                    const n = +(line.split(/ /)[0])
-                    if(n < largeLogFileLines / 2 + 10) return -1
-                    else if(n > largeLogFileLines / 2 + 20) return 1
-                    else return 0
-                },
+                new dateSearcher(
+                    new Date(largeLogFileLines / 2 + 10),
+                    new Date(largeLogFileLines / 2 + 20)
+                ),
                 logFileData.filename!
             )
             let seenLines = 0

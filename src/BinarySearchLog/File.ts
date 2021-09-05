@@ -1,5 +1,6 @@
 import * as fs from "fs"
 import * as util from "util"
+import { DateSearcher } from "."
 import { UNIXLine } from "./EOLPattern"
 export abstract class File {
     /**
@@ -113,14 +114,13 @@ export abstract class File {
 
     /**
      *
-     * @param lineCheck This must return -1 for lines before the intended range,
-     * 1 for lines after the intended range, and 0 for lines in range
+     * @param dateSearcher
      * @param filename
      * @param capturingLineEnding
      * @param filehandle
      */
     constructor(
-        protected lineCheck: (line: string) => number,
+        protected dateSearcher: DateSearcher.Base,
         private filename: string,
         protected capturingLineEnding: RegExp = UNIXLine,
         filehandle: number | null = null,
@@ -148,7 +148,7 @@ export abstract class File {
      * This reads all the lines in range, as a series of blocks
      */
     async *read() {
-        const lastLineRelativePosition = this.lineCheck(await this.readLastLineBackwards(this.fileLength))
+        const lastLineRelativePosition = this.dateSearcher.getRelativeLinePosition(await this.readLastLineBackwards(this.fileLength))
         if(lastLineRelativePosition < 0) {
             // Last line is before range
             return
@@ -157,7 +157,7 @@ export abstract class File {
         if(firstLine === null) {
             throw new Error(`Unable to find first line of ${this.filename}`)
         }
-        const firstLinePosition = this.lineCheck(firstLine)
+        const firstLinePosition = this.dateSearcher.getRelativeLinePosition(firstLine)
         if(firstLinePosition > 0) {
             // First line is after range
             return

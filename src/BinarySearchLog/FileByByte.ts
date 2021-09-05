@@ -12,7 +12,7 @@ export class FileByByte extends File {
         do {
             testPosition = Math.round((before + after) / 2)
             const {line: line} = await this.firstLineInfoForwards(testPosition)
-            const state = this.lineCheck(line)
+            const state = this.dateSearcher.getRelativeLinePosition(line)
             if(lookEarlier(state)) {
                 after = testPosition
             } else {
