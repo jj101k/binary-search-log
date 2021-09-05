@@ -1,13 +1,13 @@
 import assert from "assert"
 import {before, describe, it} from "mocha"
+import { FileByByte } from "../index"
 
-import { Filename } from "../index"
 import { TestLogFileData } from "./src/TestLogFileData"
 
-describe("File tests", () => {
+describe("File-by-byte tests", () => {
     const example1To100LogFile = __dirname + "/data/range1-100.log.example"
     it("Can skip out-of-range files", async () => {
-        const file = new Filename(
+        const file = new FileByByte(
             line => {
                 const n = +(line.split(/ /)[0])
                 if(n < 1000) return -1
@@ -24,7 +24,7 @@ describe("File tests", () => {
         assert.equal(seenLines, 0, "No lines seen")
     })
     it("Can read in-range files (start)", async () => {
-        const file = new Filename(
+        const file = new FileByByte(
             line => {
                 const n = +(line.split(/ /)[0])
                 if(n < -10) return -1
@@ -42,7 +42,7 @@ describe("File tests", () => {
         assert.equal(seenLines, 30, "Matching lines seen")
     })
     it("Can read in-range files (finish)", async () => {
-        const file = new Filename(
+        const file = new FileByByte(
             line => {
                 const n = +(line.split(/ /)[0])
                 if(n < 60) return -1
@@ -60,7 +60,7 @@ describe("File tests", () => {
         assert.equal(seenLines, 41, "Matching lines seen")
     })
     it("Can read in-range files (middle)", async () => {
-        const file = new Filename(
+        const file = new FileByByte(
             line => {
                 const n = +(line.split(/ /)[0])
                 if(n < 10) return -1
@@ -86,7 +86,7 @@ describe("File tests", () => {
         after(() => logFileData.finish())
         it("Can read in-range files (middle, large)", async function() {
             this.timeout(20)
-            const file = new Filename(
+            const file = new FileByByte(
                 line => {
                     const n = +(line.split(/ /)[0])
                     if(n < largeLogFileLines / 2 + 10) return -1

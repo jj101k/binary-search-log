@@ -1,7 +1,7 @@
 import * as fs from "fs"
 import * as util from "util"
 import { UNIXLine } from "./EOLPattern"
-export class File {
+export abstract class File {
     /**
      *
      */
@@ -16,22 +16,6 @@ export class File {
      *
      */
     private cachedFileLength: number | null = null
-
-    /**
-     *
-     */
-    private get fileLength() {
-        if(this.cachedFileLength === null) {
-            const stat = fs.fstatSync(this.filehandle)
-            this.cachedFileLength = stat.size
-        }
-        return this.cachedFileLength
-    }
-
-    /**
-     *
-     */
-    private readonly maxLineLength = 1024 * 1024
 
     /**
      *
@@ -70,40 +54,6 @@ export class File {
     /**
      *
      * @param position
-     * @param finishBeforePosition
-     * @returns
-     */
-    private async firstLineInfoForwards(position: number, finishBeforePosition: number | null = null) {
-        let currentPartialLine = ""
-        do {
-            const offset = position + currentPartialLine.length
-            const contents = await this.readString(offset, finishBeforePosition)
-            if(!contents) {
-                return {
-                    offset: 0,
-                    line: (offset == this.fileLength - 1) ? currentPartialLine : null,
-                }
-            }
-            currentPartialLine += contents
-            const lines = currentPartialLine.split(this.capturingLineEnding)
-            if(lines.length > 1 && position == 0) {
-                return {
-                    offset: 0,
-                    line: lines[0],
-                }
-            } else if(lines.length > 3) {
-                return {
-                    offset: lines[0].length + lines[1].length,
-                    line: lines[2],
-                }
-            }
-        } while(currentPartialLine.length < this.maxLineLength)
-        throw new Error("Maximum line length exceeded")
-    }
-
-    /**
-     *
-     * @param position
      * @returns
      */
     private async readLastLineBackwards(position: number) {
@@ -126,7 +76,31 @@ export class File {
     /**
      *
      */
-    private filehandle: number
+    protected get fileLength() {
+        if(this.cachedFileLength === null) {
+            const stat = fs.fstatSync(this.filehandle)
+            this.cachedFileLength = stat.size
+        }
+        return this.cachedFileLength
+    }
+
+    /**
+     *
+     */
+    protected readonly maxLineLength = 1024 * 1024
+
+    /**
+     *
+     */
+    protected filehandle: number
+
+    /**
+     *
+     * @param position
+     * @param finishBeforePosition
+     * @returns
+     */
+    protected abstract firstLineInfoForwards(position: number, finishBeforePosition?: number | null): Promise<{offset: number, line: string | null}>
 
     /**
      * Reads from the file.
@@ -142,7 +116,7 @@ export class File {
      * @param finishBeforePosition The read will stop before this point
      * @returns
      */
-    private async readString(startPosition: number, finishBeforePosition: number | null = null) {
+    protected async readString(startPosition: number, finishBeforePosition: number | null = null) {
         let position: number
         let size: number
         if(startPosition >= 0) {
@@ -170,7 +144,7 @@ export class File {
     constructor(
         private lineCheck: (line: string) => number,
         private filename: string,
-        private capturingLineEnding: RegExp = UNIXLine,
+        protected capturingLineEnding: RegExp = UNIXLine,
         filehandle: number | null = null,
     ) {
         this.buffer = Buffer.alloc(this.defaultChunkSize)
