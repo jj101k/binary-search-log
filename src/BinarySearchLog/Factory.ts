@@ -1,7 +1,19 @@
-import { FileByByte, FileByLine } from ".";
+import { DateSearcher, FileByByte, FileByLine } from ".";
 import { UNIXLine } from "./EOLPattern";
 
 export class Factory {
+    /**
+     *
+     * @param by
+     * @returns
+     */
+    public static getDateSearcher(by: "syslog") {
+        const dateSearchers = {
+            syslog: DateSearcher.Syslog,
+        }
+        return dateSearchers[by]
+    }
+
     /**
      *
      * @param by

@@ -5,6 +5,13 @@ export abstract class Base {
 
     /**
      *
+     * @param referenceDate
+     */
+    constructor(protected referenceDate: Date) {
+    }
+
+    /**
+     *
      * @param low
      * @param high
      * @returns
