@@ -124,6 +124,11 @@ export class File {
     }
 
     /**
+     *
+     */
+    private filehandle: number
+
+    /**
      * Reads from the file.
      *
      * If you supply a negative offset, this will read as if it were literally
@@ -159,16 +164,24 @@ export class File {
      * @param lineCheck This must return -1 for lines before the intended range,
      * 1 for lines after the intended range, and 0 for lines in range
      * @param filename
-     * @param filehandle
      * @param capturingLineEnding
+     * @param filehandle
      */
     constructor(
         private lineCheck: (line: string) => number,
         private filename: string,
-        protected filehandle: number,
         private capturingLineEnding: RegExp = UNIXLine,
+        filehandle: number | null = null,
     ) {
         this.buffer = Buffer.alloc(this.defaultChunkSize)
+        this.filehandle = filehandle || fs.openSync(this.filename, "r")
+    }
+
+    /**
+     * Releases the filehandle
+     */
+    finish() {
+        fs.close(this.filehandle)
     }
 
     /**
