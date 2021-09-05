@@ -2,6 +2,38 @@ import { File } from "./File"
 export class FileByByte extends File {
     /**
      *
+     * @param lookEarlier
+     * @returns
+     */
+    protected async findPosition(lookEarlier: (r: number) => boolean) {
+        let before = -1
+        let after = this.fileLength
+        let testPosition: number
+        do {
+            testPosition = Math.round((before + after) / 2)
+            const {line: line} = await this.firstLineInfoForwards(testPosition)
+            const state = this.lineCheck(line)
+            if(lookEarlier(state)) {
+                after = testPosition
+            } else {
+                before = testPosition
+            }
+        } while(after > before + 1)
+
+        /*
+         * @todo this should really filter to the line offsets and instead abort
+         * once there is only one line boundary left
+         */
+
+        const position = after
+        const contents = await this.readString(position)
+        const lines = contents.split(this.capturingLineEnding, 2)
+
+        return position + lines[0].length + lines[1].length
+    }
+
+    /**
+     *
      * @param position
      * @param finishBeforePosition
      * @returns
