@@ -1,4 +1,4 @@
-import { EOLPattern, FileByLine, DateSearcher } from "./index"
+import { EOLPattern, DateSearcher, Factory } from "./index"
 
 const [filename, lowString, highString] = process.argv.slice(2)
 
@@ -11,7 +11,8 @@ if(isNaN(high.valueOf())) {
     throw new Error(`Date "${highString}" is invalid`)
 }
 const dateSearcher = new DateSearcher.Syslog(low.getFullYear())
-const file = new FileByLine(
+const lineFinder = Factory.getLineFinder()
+const file = new lineFinder(
     dateSearcher.lineHandler(low, high),
     filename,
     EOLPattern.FoldedLine
