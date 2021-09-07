@@ -27,3 +27,20 @@ versions of this tool might mitigate this by gathering multiple entries.
 This fundamentally relies on having normal seek() behaviour. If your source does
 not support seek() at all (eg. .gz data) or emulates seek() via straight-line
 read, you can expect that you'd have the same performance as a straight search.
+
+## Quick Start (Code)
+
+```js
+import {Factory} from "binary-search-log"
+const dateSearcher = Factory.getDateSearcher("syslog")
+const lineFinder = Factory.getLineFinder()
+
+const finder = new lineFinder(
+    new dateSearcher(low, high),
+    filename
+)
+for await (const line of finder.readLines()) {
+    process.stdout.write(block)
+}
+finder.finish()
+```
