@@ -1,27 +1,40 @@
 import { EOLPattern, Factory } from "./index"
 import getopts from "getopts"
 
+/**
+ *
+ * @param dateIn
+ * @throws
+ * @returns
+ */
+function dateOrNull(dateIn: string | null | undefined) {
+    if(dateIn) {
+        const dateOut = new Date(dateIn)
+        if(isNaN(dateOut.valueOf())) {
+            throw new Error(`Date "${dateIn}" is invalid`)
+        }
+        return dateOut
+    } else {
+        return null
+    }
+}
+
 const options = getopts(process.argv.slice(2), {
-  alias: {
-    "after-date": "a",
-    "before-date": "b",
-  },
-})
+    alias: {
+      "after-date": "a",
+      "before-date": "b",
+    },
+  })
 
 const filenames = options._
 const lowString = options["after-date"]
 const highString = options["before-date"]
 
-const low = new Date(lowString)
-if(isNaN(low.valueOf())) {
-    throw new Error(`Date "${lowString}" is invalid`)
-}
-const high = new Date(highString)
-if(isNaN(high.valueOf())) {
-    throw new Error(`Date "${highString}" is invalid`)
-}
 const dateSearcher = Factory.getDateSearcher("syslog")
-const dateSearcherInstance = new dateSearcher(low, high)
+const dateSearcherInstance = new dateSearcher(
+    dateOrNull(lowString),
+    dateOrNull(highString)
+)
 const lineFinder = Factory.getLineFinder()
 
 async function findLines() {
