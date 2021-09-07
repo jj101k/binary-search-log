@@ -27,16 +27,16 @@ const lineFinder = Factory.getLineFinder()
 async function findLines() {
     const start = new Date()
     for(const filename of filenames) {
-        const file = new lineFinder(
+        const finder = new lineFinder(
             dateSearcherInstance,
             filename,
             EOLPattern.FoldedLine
         )
 
-        for await (const block of file.read()) {
+        for await (const block of finder.read()) {
             process.stdout.write(block)
         }
-        file.finish()
+        finder.finish()
 
     }
     const finish = new Date()
