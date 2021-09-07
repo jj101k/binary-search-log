@@ -24,21 +24,22 @@ const dateSearcher = Factory.getDateSearcher("syslog")
 const dateSearcherInstance = new dateSearcher(low, high)
 const lineFinder = Factory.getLineFinder()
 
-const file = new lineFinder(
-    dateSearcherInstance,
-    filename,
-    EOLPattern.FoldedLine
-)
-const getLines = async () => {
+async function findLines() {
+    const file = new lineFinder(
+        dateSearcherInstance,
+        filename,
+        EOLPattern.FoldedLine
+    )
+
+    const start = new Date()
+
     for await (const block of file.read()) {
         process.stdout.write(block)
     }
     file.finish()
-}
 
-const start = new Date()
-
-getLines().then(() => {
     const finish = new Date()
     console.log(`Took ${finish.valueOf() - start.valueOf()}ms`)
-})
+}
+
+findLines()
