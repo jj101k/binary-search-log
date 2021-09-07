@@ -8,7 +8,7 @@ const options = getopts(process.argv.slice(2), {
   },
 })
 
-const filename = options._[0]
+const filenames = options._
 const lowString = options["after-date"]
 const highString = options["before-date"]
 
@@ -25,19 +25,20 @@ const dateSearcherInstance = new dateSearcher(low, high)
 const lineFinder = Factory.getLineFinder()
 
 async function findLines() {
-    const file = new lineFinder(
-        dateSearcherInstance,
-        filename,
-        EOLPattern.FoldedLine
-    )
-
     const start = new Date()
+    for(const filename of filenames) {
+        const file = new lineFinder(
+            dateSearcherInstance,
+            filename,
+            EOLPattern.FoldedLine
+        )
 
-    for await (const block of file.read()) {
-        process.stdout.write(block)
+        for await (const block of file.read()) {
+            process.stdout.write(block)
+        }
+        file.finish()
+
     }
-    file.finish()
-
     const finish = new Date()
     console.log(`Took ${finish.valueOf() - start.valueOf()}ms`)
 }
