@@ -19,9 +19,9 @@ export class StartingTimestamp extends Base {
         let md
         if(md = line.match(this.linePattern)) {
             const n = +md[1]
-            if(n < this.lowBound.valueOf()) {
+            if(this.lowBound !== null && n < this.lowBound.valueOf()) {
                 return -1
-            } else if(n > this.highBound.valueOf()) {
+            } else if(this.highBound !== null && n > this.highBound.valueOf()) {
                 return 1
             } else {
                 return 0

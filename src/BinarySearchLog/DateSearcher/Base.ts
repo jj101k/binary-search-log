@@ -12,8 +12,13 @@ export abstract class Base {
      * @param highBound
      * @param referenceDate
      */
-    constructor(protected lowBound: Date, protected highBound: Date, referenceDate?: Date) {
-        this.referenceDate = referenceDate ?? lowBound
+    constructor(protected lowBound: Date | null, protected highBound: Date | null, referenceDate?: Date) {
+        const bestReferenceDate = referenceDate ?? lowBound ?? highBound
+        if(bestReferenceDate) {
+            this.referenceDate = bestReferenceDate
+        } else {
+            throw new Error(`Cannot start a date searcher without a reference date`)
+        }
     }
 
     /**
