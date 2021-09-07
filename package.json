@@ -27,6 +27,7 @@
   },
   "homepage": "https://github.com/jj101k/binary-search-log#readme",
   "dependencies": {
+    "getopts": "^2.3.0",
     "typescript": "^4.3.5"
   },
   "devDependencies": {

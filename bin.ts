@@ -1,6 +1,16 @@
-import { EOLPattern, DateSearcher, Factory } from "./index"
+import { EOLPattern, Factory } from "./index"
+import getopts from "getopts"
 
-const [filename, lowString, highString] = process.argv.slice(2)
+const options = getopts(process.argv.slice(2), {
+  alias: {
+    "after-date": "a",
+    "before-date": "b",
+  },
+})
+
+const filename = options._[0]
+const lowString = options["after-date"]
+const highString = options["before-date"]
 
 const low = new Date(lowString)
 if(isNaN(low.valueOf())) {
