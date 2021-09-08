@@ -5,11 +5,11 @@ import { TestLogFileData } from "../src/TestLogFileData"
 
 describe("File-by-line tests", () => {
     const lineFinder = Factory.getLineFinder("line")
-    const dateSearcher = Factory.getDateSearcher("startingTimestamp")
+    const binarySearchTester = Factory.getBinarySearchNumberTester("startingTimestamp")
     const example1To100LogFile = __dirname + "/../data/range1-100.log.example"
     it("Can skip out-of-range files", async () => {
         const file = new lineFinder(
-            new dateSearcher(new Date(1000), new Date(3000)),
+            new binarySearchTester(1000, 3000),
             example1To100LogFile
         )
         let seenLines = 0
@@ -21,7 +21,7 @@ describe("File-by-line tests", () => {
     })
     it("Can read in-range files (start)", async () => {
         const file = new lineFinder(
-            new dateSearcher(new Date(-10), new Date(30)),
+            new binarySearchTester(-10, 30),
             example1To100LogFile
         )
         let seenLines = 0
@@ -34,7 +34,7 @@ describe("File-by-line tests", () => {
     })
     it("Can read in-range files (finish)", async () => {
         const file = new lineFinder(
-            new dateSearcher(new Date(60), new Date(110)),
+            new binarySearchTester(60, 110),
             example1To100LogFile
         )
         let seenLines = 0
@@ -47,7 +47,7 @@ describe("File-by-line tests", () => {
     })
     it("Can read in-range files (middle)", async () => {
         const file = new lineFinder(
-            new dateSearcher(new Date(10), new Date(20)),
+            new binarySearchTester(10, 20),
             example1To100LogFile
         )
         let seenLines = 0
@@ -68,9 +68,9 @@ describe("File-by-line tests", () => {
         it("Can read in-range files (middle, large)", async function() {
             this.timeout(20)
             const file = new lineFinder(
-                new dateSearcher(
-                    new Date(largeLogFileLines / 2 + 10),
-                    new Date(largeLogFileLines / 2 + 20)
+                new binarySearchTester(
+                    largeLogFileLines / 2 + 10,
+                    largeLogFileLines / 2 + 20,
                 ),
                 logFileData.filename!
             )

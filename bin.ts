@@ -30,8 +30,8 @@ const filenames = options._
 const lowString = options["after-date"]
 const highString = options["before-date"]
 
-const dateSearcher = Factory.getDateSearcher("syslog")
-const dateSearcherInstance = new dateSearcher(
+const binarySearchTester = Factory.getBinarySearchDateTester("syslog")
+const binarySearchTesterInstance = new binarySearchTester(
     dateOrNull(lowString),
     dateOrNull(highString)
 )
@@ -41,7 +41,7 @@ async function findLines() {
     const start = new Date()
     for(const filename of filenames) {
         const finder = new lineFinder(
-            dateSearcherInstance,
+            binarySearchTesterInstance,
             filename,
             EOLPattern.FoldedLine
         )

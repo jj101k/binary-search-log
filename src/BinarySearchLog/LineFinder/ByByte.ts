@@ -12,7 +12,7 @@ export class ByByte extends Base {
         do {
             testPosition = Math.round((before + after) / 2)
             const {line: line} = await this.firstLineInfoForwards(testPosition)
-            const state = this.dateSearcher.getRelativeLinePosition(line)
+            const state = this.binarySearchTester.getRelativeLinePosition(line)
             if(lookEarlier(state)) {
                 after = testPosition
             } else {

@@ -21,7 +21,7 @@ export class ByLine extends Base {
                 }
             } else {
                 testPosition += lineInfo.offset
-                const state = this.dateSearcher.getRelativeLinePosition(lineInfo.line)
+                const state = this.binarySearchTester.getRelativeLinePosition(lineInfo.line)
                 if(lookEarlier(state)) {
                     after = testPosition
                 } else {

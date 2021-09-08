@@ -5,12 +5,12 @@ import { TestLogFileData } from "../src/TestLogFileData"
 
 describe("Date searcher tests", () => {
     const lineFinder = Factory.getLineFinder("line")
-    const dateSearcher = Factory.getDateSearcher("startingTimestamp")
+    const binarySearchTester = Factory.getBinarySearchNumberTester("startingTimestamp")
     const example1To100LogFile = __dirname + "/../data/range1-100.log.example"
     describe("Finish-only", () => {
         it("Can skip out-of-range files (finish)", async () => {
             const file = new lineFinder(
-                new dateSearcher(null, new Date(-1)),
+                new binarySearchTester(null, -1),
                 example1To100LogFile
             )
             let seenLines = 0
@@ -22,7 +22,7 @@ describe("Date searcher tests", () => {
         })
         it("Can read in-range files (finish)", async () => {
             const file = new lineFinder(
-                new dateSearcher(null, new Date(110)),
+                new binarySearchTester(null, 110),
                 example1To100LogFile
             )
             let seenLines = 0
@@ -37,7 +37,7 @@ describe("Date searcher tests", () => {
     describe("Start-only", () => {
         it("Can skip out-of-range files (start)", async () => {
             const file = new lineFinder(
-                new dateSearcher(new Date(1000), null),
+                new binarySearchTester(1000, null),
                 example1To100LogFile
             )
             let seenLines = 0
@@ -49,7 +49,7 @@ describe("Date searcher tests", () => {
         })
         it("Can read in-range files (start)", async () => {
             const file = new lineFinder(
-                new dateSearcher(new Date(-10), null),
+                new binarySearchTester(-10, null),
                 example1To100LogFile
             )
             let seenLines = 0

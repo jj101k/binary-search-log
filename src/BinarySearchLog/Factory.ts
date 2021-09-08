@@ -1,4 +1,4 @@
-import { DateSearcher, LineFinder } from ".";
+import { BinarySearchTester, LineFinder } from ".";
 
 export class Factory {
     /**
@@ -6,12 +6,23 @@ export class Factory {
      * @param by
      * @returns
      */
-    public static getDateSearcher(by: "startingTimestamp" | "syslog") {
-        const dateSearchers = {
-            startingTimestamp: DateSearcher.StartingTimestamp,
-            syslog: DateSearcher.Syslog,
+    public static getBinarySearchDateTester(by: "syslog") {
+        const binarySearchTesters = {
+            syslog: BinarySearchTester.Syslog,
         }
-        return dateSearchers[by]
+        return binarySearchTesters[by]
+    }
+
+    /**
+     *
+     * @param by
+     * @returns
+     */
+    public static getBinarySearchNumberTester(by: "startingTimestamp") {
+        const binarySearchTesters = {
+            startingTimestamp: BinarySearchTester.StartingTimestamp,
+        }
+        return binarySearchTesters[by]
     }
 
     /**
