@@ -32,11 +32,11 @@ read, you can expect that you'd have the same performance as a straight search.
 
 ```js
 import {Factory} from "binary-search-log"
-const dateSearcher = Factory.getDateSearcher("syslog")
+const binarySearchTester = Factory.getBinarySearchDateTester("syslog")
 const lineFinder = Factory.getLineFinder()
 
 const finder = new lineFinder(
-    new dateSearcher(low, high),
+    new binarySearchTester(low, high),
     filename
 )
 for await (const line of finder.readLines()) {
