@@ -1,7 +1,6 @@
 import assert from "assert"
-import {before, describe, it} from "mocha"
+import {describe, it} from "mocha"
 import { Factory } from "../../index"
-import { TestLogFileData } from "../src/TestLogFileData"
 
 describe("Date searcher tests", () => {
     const lineFinder = Factory.getLineFinder("line")
