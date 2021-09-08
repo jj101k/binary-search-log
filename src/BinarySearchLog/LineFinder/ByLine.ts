@@ -1,3 +1,4 @@
+import * as Errors from "../Errors"
 import { Base } from "./Base"
 export class ByLine extends Base {
     /**
@@ -65,6 +66,6 @@ export class ByLine extends Base {
                 }
             }
         } while(currentPartialLine.length < this.maxLineLength)
-        throw new Error("Maximum line length exceeded")
+        throw new Errors.LimitExceeded("Maximum line length exceeded")
     }
 }

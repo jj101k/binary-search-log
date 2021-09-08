@@ -1,6 +1,7 @@
 import * as fs from "fs"
 import * as util from "util"
-import { BinarySearchTester } from ".."
+import * as BinarySearchTester from "../BinarySearchTester"
+import * as Errors from "../Errors"
 import { UNIXLine } from "../EOLPattern"
 export abstract class Base {
     /**
@@ -49,7 +50,7 @@ export abstract class Base {
                 return lines[0]
             }
         } while(currentPartialLine.length < this.maxLineLength)
-        throw new Error("Maximum line length exceeded")
+        throw new Errors.LimitExceeded("Maximum line length exceeded")
     }
 
     /**
@@ -155,7 +156,7 @@ export abstract class Base {
         }
         const {line: firstLine} = await this.firstLineInfoForwards(0)
         if(firstLine === null) {
-            throw new Error(`Unable to find first line of ${this.filename}`)
+            throw new Errors.InvalidFile(`Unable to find first line of ${this.filename}`)
         }
         const firstLinePosition = this.binarySearchTester.getRelativeLinePosition(firstLine)
         if(firstLinePosition > 0) {

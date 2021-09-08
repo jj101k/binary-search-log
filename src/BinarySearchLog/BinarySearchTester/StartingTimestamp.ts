@@ -1,3 +1,4 @@
+import * as Errors from "../Errors"
 import { Base } from "./Base"
 
 export class StartingTimestamp extends Base<number> {
@@ -23,6 +24,6 @@ export class StartingTimestamp extends Base<number> {
                 return 0
             }
         }
-        throw new Error(`Unable to parse timestamp on: "${line}"`)
+        throw new Errors.Parser(`Unable to parse timestamp on: "${line}"`)
     }
 }

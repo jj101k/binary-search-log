@@ -1,4 +1,4 @@
-import { EOLPattern, Factory } from "./index"
+import { EOLPattern, Errors, Factory } from "./index"
 import getopts from "getopts"
 
 /**
@@ -11,7 +11,7 @@ function dateOrNull(dateIn: string | null | undefined) {
     if(dateIn) {
         const dateOut = new Date(dateIn)
         if(isNaN(dateOut.valueOf())) {
-            throw new Error(`Date "${dateIn}" is invalid`)
+            throw new Errors.Validation(`Date "${dateIn}" is invalid`)
         }
         return dateOut
     } else {

@@ -1,3 +1,4 @@
+import * as Errors from "../Errors"
 import { Base } from "./Base"
 
 export abstract class DateBase extends Base<Date> {
@@ -20,7 +21,7 @@ export abstract class DateBase extends Base<Date> {
         if(bestReferenceDate) {
             this.referenceDate = bestReferenceDate
         } else {
-            throw new Error(`Cannot start a date searcher without a reference date`)
+            throw new Errors.Arguments(`Cannot start a date searcher without a reference date`)
         }
     }
 
@@ -35,6 +36,6 @@ export abstract class DateBase extends Base<Date> {
             }
             return 0
         }
-        throw new Error(`Unable to parse date on: "${line}"`)
+        throw new Errors.Parser(`Unable to parse date on: "${line}"`)
     }
 }
