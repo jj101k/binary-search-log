@@ -1,5 +1,10 @@
 import * as LineFinder from "./LineFinder"
 import * as BinarySearchTester from "./BinarySearchTester"
+import * as Errors from "./Errors"
+
+type nonAbstractBinarySearchTester<T> = {
+    new(l: T | null, h: T | null, r?: T): BinarySearchTester.Base<T>
+}
 
 export class Factory {
     /**
@@ -7,13 +12,17 @@ export class Factory {
      * @param by
      * @returns
      */
-    public static getBinarySearchDateTester(by: "commonLogFormat" | "syslog" | "universalSortableLog") {
-        const binarySearchTesters = {
+    public static getBinarySearchDateTester(by: string) {
+        const binarySearchTesters: {[name: string]: nonAbstractBinarySearchTester<Date>} = {
             commonLogFormat: BinarySearchTester.CommonLogFormat,
             syslog: BinarySearchTester.Syslog,
             universalSortableLog: BinarySearchTester.UniversalSortableLog,
         }
-        return binarySearchTesters[by]
+        const c = binarySearchTesters[by]
+        if(!c) {
+            throw new Errors.Arguments(`No binary search tester named ${by}`)
+        }
+        return c
     }
 
     /**
@@ -21,11 +30,15 @@ export class Factory {
      * @param by
      * @returns
      */
-    public static getBinarySearchNumberTester(by: "startingTimestamp") {
-        const binarySearchTesters = {
+    public static getBinarySearchNumberTester(by: string) {
+        const binarySearchTesters: {[name: string]: nonAbstractBinarySearchTester<number>} = {
             startingTimestamp: BinarySearchTester.StartingTimestamp,
         }
-        return binarySearchTesters[by]
+        const c = binarySearchTesters[by]
+        if(!c) {
+            throw new Errors.Arguments(`No binary search tester named ${by}`)
+        }
+        return c
     }
 
     /**
