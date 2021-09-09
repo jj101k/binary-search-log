@@ -1,7 +1,7 @@
 import assert from "assert"
 import {before, describe, it} from "mocha"
 import { Factory } from "../../index"
-import { TestLogFileData } from "../src/TestLogFileData"
+import * as TestLogFileData from "../src/TestLogFileData"
 
 describe("File-by-line tests", () => {
     const lineFinder = Factory.getLineFinder("line")
@@ -62,7 +62,7 @@ describe("File-by-line tests", () => {
     // You can remove .skip below if you want to try this.
     describe.skip("large file tests", () => {
         const largeLogFileLines = 2_000_000
-        const logFileData = new TestLogFileData(largeLogFileLines)
+        const logFileData = new TestLogFileData.Number(largeLogFileLines)
         before(() => logFileData.build())
         after(() => logFileData.finish())
         it("Can read in-range files (middle, large)", async function() {
