@@ -47,7 +47,7 @@ export class ByByte extends Base {
             if(!contents) {
                 return {
                     offset: 0,
-                    line: (offset == this.fileLength - 1) ? currentPartialLine : "",
+                    line: (offset == this.fileLength - 1 || offset == this.fileLength) ? currentPartialLine : "",
                 }
             }
             currentPartialLine += contents
