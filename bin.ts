@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 import { EOLPattern, Errors, Factory } from "./index"
 import getopts from "getopts"
 
