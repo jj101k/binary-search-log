@@ -6,6 +6,33 @@ describe("Extremes", () => {
     const byByteFinder = Factory.getLineFinder("byte")
     const byLineFinder = Factory.getLineFinder("line")
     const binarySearchTester = Factory.getBinarySearchNumberTester("startingTimestamp")
+    describe("Does not fail on empty files", () => {
+        const exampleEmptyFile = __dirname + "/../data/empty.log.example"
+        it("Does not fail on empty files (by-line)", async () => {
+            const file = new byLineFinder(
+                new binarySearchTester(null, -1),
+                exampleEmptyFile
+            )
+            let seenLines = 0
+            for await(const line of file.readLines()) {
+                seenLines++
+            }
+            file.finish()
+            assert.equal(seenLines, 0, "No lines seen")
+        })
+        it("Does not fail on empty files (by-byte)", async () => {
+            const file = new byByteFinder(
+                new binarySearchTester(null, -1),
+                exampleEmptyFile
+            )
+            let seenLines = 0
+            for await(const line of file.readLines()) {
+                seenLines++
+            }
+            file.finish()
+            assert.equal(seenLines, 0, "No lines seen")
+        })
+    })
     describe("Does not fail with no newlines", () => {
         const exampleNoNewlineFile = __dirname + "/../data/range1-1-no-newline.log.example"
         it("Does not fail with no newlines (by-line)", async () => {
