@@ -25,7 +25,7 @@ const options = getopts(process.argv.slice(2), {
       "before-date": "b",
       "format": "f",
     },
-  })
+})
 
 const filenames = options._
 const format = options["format"] || "dateAutodetect"
