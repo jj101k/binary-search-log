@@ -1,5 +1,6 @@
 export * from "./Base"
 export * from "./CommonLogFormat"
+export * from "./DateAutodetect"
 export * from "./StartingTimestamp"
 export * from "./Syslog"
 export * from "./UniversalSortableLog"
