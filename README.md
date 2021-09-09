@@ -44,3 +44,14 @@ for await (const line of finder.readLines()) {
 }
 finder.finish()
 ```
+
+## Bugs and Edge Cases
+
+### What if the file contains no newlines or is just garbage?
+
+The search will work without newlines (it will be taken as a single line). If
+you have random content, you can expect to get a parse failure exception.
+
+### What if each line is extremely long?
+
+If it's over 1MiB, you'll get an exception. Anything below that should work fine.
