@@ -9,6 +9,7 @@
   "scripts": {
     "build": "tsc",
     "prepare": "rm -rf dist; tsc",
+    "rebuild-logs": "tsc && node ./dist/test/util/rebuild-logs.js",
     "test": "mocha --require ts-node/register test/**/*.test.ts"
   },
   "repository": {
