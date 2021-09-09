@@ -32,7 +32,7 @@ read, you can expect that you'd have the same performance as a straight search.
 
 ```js
 import {Factory} from "binary-search-log"
-const binarySearchTester = Factory.getBinarySearchDateTester("syslog")
+const binarySearchTester = Factory.getBinarySearchDateTester("dateAutodetect")
 const lineFinder = Factory.getLineFinder()
 
 const finder = new lineFinder(
