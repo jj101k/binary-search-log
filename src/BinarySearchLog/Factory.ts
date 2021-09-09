@@ -1,4 +1,5 @@
-import { BinarySearchTester, LineFinder } from ".";
+import * as LineFinder from "./LineFinder"
+import * as BinarySearchTester from "./BinarySearchTester"
 
 export class Factory {
     /**
