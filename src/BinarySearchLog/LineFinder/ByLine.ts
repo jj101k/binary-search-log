@@ -49,7 +49,7 @@ export class ByLine extends Base {
             if(!contents) {
                 return {
                     offset: 0,
-                    line: (offset == this.fileLength - 1 || offset == this.fileLength) ? currentPartialLine : null,
+                    line: (position == 0 && (offset == this.fileLength - 1 || offset == this.fileLength)) ? currentPartialLine : null,
                 }
             }
             currentPartialLine += contents
