@@ -23,14 +23,16 @@ const options = getopts(process.argv.slice(2), {
     alias: {
       "after-date": "a",
       "before-date": "b",
+      "format": "f",
     },
   })
 
 const filenames = options._
+const format = options["format"] || "syslog"
 const lowString = options["after-date"]
 const highString = options["before-date"]
 
-const binarySearchTester = Factory.getBinarySearchDateTester("syslog")
+const binarySearchTester = Factory.getBinarySearchDateTester(format)
 const binarySearchTesterInstance = new binarySearchTester(
     dateOrNull(lowString),
     dateOrNull(highString)
