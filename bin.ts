@@ -28,7 +28,7 @@ const options = getopts(process.argv.slice(2), {
   })
 
 const filenames = options._
-const format = options["format"] || "syslog"
+const format = options["format"] || "dateAutodetect"
 const lowString = options["after-date"]
 const highString = options["before-date"]
 
