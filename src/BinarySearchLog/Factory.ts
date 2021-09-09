@@ -16,6 +16,7 @@ export class Factory {
         const binarySearchTesters: {[name: string]: nonAbstractBinarySearchTester<Date>} = {
             commonLogFormat: BinarySearchTester.CommonLogFormat,
             dateAutodetect: BinarySearchTester.DateAutodetect,
+            dateAutodetectPerLine: BinarySearchTester.DateAutodetectPerLine,
             syslog: BinarySearchTester.Syslog,
             universalSortableLog: BinarySearchTester.UniversalSortableLog,
         }
