@@ -25,7 +25,7 @@ export class Syslog extends Base {
                 const dateString = [
                     lineDate.toLocaleDateString("en-US", {month: "short"}),
                     ("" + lineDate.getDate()).padStart(2, " "),
-                    lineDate.toLocaleTimeString("en-US", {hour: "2-digit", minute: "2-digit", second: "2-digit"}),
+                    lineDate.toLocaleTimeString("en-US", {hourCycle: "h23", hour: "2-digit", minute: "2-digit", second: "2-digit"}),
                 ].join(" ")
                 block += `${dateString} ${this.getContent(offset)}\n`
                 lineDate.setHours(lineDate.getHours() + 1)
