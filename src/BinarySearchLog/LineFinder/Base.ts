@@ -149,7 +149,15 @@ export abstract class Base {
      * This reads all the lines in range, as a series of blocks
      */
     async *read() {
-        const lastLineRelativePosition = this.binarySearchTester.getRelativeLinePosition(await this.readLastLineBackwards(this.fileLength))
+        if(this.fileLength == 0) {
+            // No lines
+            return
+        }
+        const lastLine = await this.readLastLineBackwards(this.fileLength)
+        if(lastLine.length == 0) {
+            throw new Errors.InvalidFile("Last line is empty")
+        }
+        const lastLineRelativePosition = this.binarySearchTester.getRelativeLinePosition(lastLine)
         if(lastLineRelativePosition < 0) {
             // Last line is before range
             return
@@ -157,6 +165,9 @@ export abstract class Base {
         const {line: firstLine} = await this.firstLineInfoForwards(0)
         if(firstLine === null) {
             throw new Errors.InvalidFile(`Unable to find first line of ${this.filename}`)
+        }
+        if(firstLine.length == 0) {
+            throw new Errors.InvalidFile("First line is empty")
         }
         const firstLinePosition = this.binarySearchTester.getRelativeLinePosition(firstLine)
         if(firstLinePosition > 0) {
