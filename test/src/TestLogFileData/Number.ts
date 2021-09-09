@@ -19,7 +19,7 @@ export class Number extends Base {
                 if(timestamp > this.lines) {
                     break
                 }
-                block += `${timestamp} ${"#".repeat(timestamp % 256)}\n`
+                block += `${timestamp} ${this.getContent(timestamp)}\n`
             }
             fs.writeSync(fileHandle, block)
         }

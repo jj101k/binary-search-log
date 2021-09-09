@@ -6,6 +6,14 @@ export abstract class Base {
     protected abstract readonly logType: string
     protected readonly writeBlockLines = 10_000
 
+    protected getContent(offset: number) {
+        if(this.randomLineLengths) {
+            return "#".repeat(Math.floor(Math.random() * 256))
+        } else {
+            return "#".repeat(offset % 256)
+        }
+    }
+
     protected initTemporaryDirectory() {
         if(!this.temporaryDirectory) {
             const osTempPath = os.tmpdir()
@@ -17,8 +25,9 @@ export abstract class Base {
      *
      * @param lines The number of lines to create
      * @param temporaryDirectory
+     * @param randomLineLengths
      */
-    constructor(public lines: number, protected temporaryDirectory?: string) {
+    constructor(public lines: number, protected temporaryDirectory?: string, private randomLineLengths: boolean = false) {
     }
 
     /**

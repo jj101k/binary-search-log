@@ -21,7 +21,7 @@ export class ISODate extends Base {
                 if(offset > this.lines) {
                     break
                 }
-                block += `${lineDate.toISOString()} ${"#".repeat(offset % 256)}\n`
+                block += `${lineDate.toISOString()} ${this.getContent(offset)}\n`
                 lineDate.setHours(lineDate.getHours() + 1)
             }
             fs.writeSync(fileHandle, block)

@@ -27,7 +27,7 @@ export class Syslog extends Base {
                     ("" + lineDate.getDate()).padStart(2, " "),
                     lineDate.toLocaleTimeString("en-US", {hour: "2-digit", minute: "2-digit", second: "2-digit"}),
                 ].join(" ")
-                block += `${dateString} ${"#".repeat(offset % 256)}\n`
+                block += `${dateString} ${this.getContent(offset)}\n`
                 lineDate.setHours(lineDate.getHours() + 1)
             }
             fs.writeSync(fileHandle, block)
