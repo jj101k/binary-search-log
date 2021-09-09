@@ -8,7 +8,7 @@
   },
   "scripts": {
     "build": "tsc",
-    "postinstall": "tsc",
+    "prepare": "rm -rf dist; tsc",
     "test": "mocha --require ts-node/register test/**/*.test.ts"
   },
   "repository": {
@@ -27,13 +27,13 @@
   },
   "homepage": "https://github.com/jj101k/binary-search-log#readme",
   "dependencies": {
-    "getopts": "^2.3.0",
-    "typescript": "^4.3.5"
+    "getopts": "^2.3.0"
   },
   "devDependencies": {
     "@types/mocha": "^9.0.0",
     "@types/node": "^16.7.1",
     "mocha": "^9.1.1",
-    "ts-node": "^10.2.1"
+    "ts-node": "^10.2.1",
+    "typescript": "^4.3.5"
   }
 }
