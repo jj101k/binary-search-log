@@ -26,10 +26,15 @@ const options = getopts(process.argv.slice(2), {
       "format": "f",
       "sample-consumer": "s"
     },
+    boolean: ["s"],
+    default: {
+        "f": "dateAutodetect"
+    },
+    string: ["a", "b", "f"],
 })
 
 const filenames = options._
-const format = options["format"] || "dateAutodetect"
+const format = options["format"]
 const lowString = options["after-date"]
 const highString = options["before-date"]
 const sampleConsumer = options["sample-consumer"]
