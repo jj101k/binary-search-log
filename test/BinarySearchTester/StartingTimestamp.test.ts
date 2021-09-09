@@ -2,7 +2,7 @@ import assert from "assert"
 import {describe, it} from "mocha"
 import { Factory } from "../../index"
 
-describe("Date searcher tests", () => {
+describe("Date searcher tests (starting timestamp)", () => {
     const lineFinder = Factory.getLineFinder("line")
     const binarySearchTester = Factory.getBinarySearchNumberTester("startingTimestamp")
     const example1To100LogFile = __dirname + "/../data/range1-100.log.example"
