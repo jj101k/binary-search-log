@@ -7,9 +7,10 @@ export class Factory {
      * @param by
      * @returns
      */
-    public static getBinarySearchDateTester(by: "syslog") {
+    public static getBinarySearchDateTester(by: "syslog" | "universalSortableLog") {
         const binarySearchTesters = {
             syslog: BinarySearchTester.Syslog,
+            universalSortableLog: BinarySearchTester.UniversalSortableLog,
         }
         return binarySearchTesters[by]
     }
