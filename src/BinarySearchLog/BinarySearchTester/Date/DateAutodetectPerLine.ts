@@ -1,8 +1,6 @@
-import { CommonLogFormat } from "./CommonLogFormat"
-import { Syslog } from "./Syslog"
-import { UniversalSortableLog } from "./UniversalSortableLog"
-import * as Errors from "../Errors"
-import { Base } from "./Base"
+import * as Errors from "../../Errors"
+import { Base } from "../Base"
+import { Factory } from "./Factory"
 
 export class DateAutodetectPerLine extends Base<Date> {
     linePattern = /.*/
@@ -18,13 +16,7 @@ export class DateAutodetectPerLine extends Base<Date> {
     }
 
     getRelativeLinePosition(line: string) {
-        let proxy: Base<Date> | null = null
-        const classes = [
-            CommonLogFormat,
-            Syslog,
-            UniversalSortableLog,
-        ]
-        for(const c of classes) {
+        for(const c of Object.values(Factory.dateHandlers)) {
             const i = new c(this.lowBound, this.highBound, this.referenceDate)
             try {
                 return i.getRelativeLinePosition(line)

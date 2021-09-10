@@ -5,7 +5,7 @@ import { Factory } from "../../index"
 
 describe("Date searcher tests (syslog)", () => {
     const lineFinder = Factory.getLineFinder("line")
-    const binarySearchTester = Factory.getBinarySearchDateTester("syslog")
+    const binarySearchTester = Factory.getBinarySearchDateTester("Syslog")
     const example1To100LogFile = __dirname + "/../data/range1-100.syslog.example"
     const tooLowDate = new Date("1999-12-31")
     const referenceDate = new Date("2000-01-01")

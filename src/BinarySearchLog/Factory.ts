@@ -10,21 +10,11 @@ export class Factory {
     /**
      *
      * @param by
+     * @throws
      * @returns
      */
     public static getBinarySearchDateTester(by: string) {
-        const binarySearchTesters: {[name: string]: nonAbstractBinarySearchTester<Date>} = {
-            commonLogFormat: BinarySearchTester.CommonLogFormat,
-            dateAutodetect: BinarySearchTester.DateAutodetect,
-            dateAutodetectPerLine: BinarySearchTester.DateAutodetectPerLine,
-            syslog: BinarySearchTester.Syslog,
-            universalSortableLog: BinarySearchTester.UniversalSortableLog,
-        }
-        const c = binarySearchTesters[by]
-        if(!c) {
-            throw new Errors.Arguments(`No binary search tester named ${by}`)
-        }
-        return c
+        return BinarySearchTester.Date.Factory.getGeneralSearchTester(by)
     }
 
     /**

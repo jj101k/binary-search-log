@@ -62,17 +62,17 @@ Finds log file lines between the supplied before and after dates.
                             should work for most cases (by picking one of the
                             others). The handlers are:
 
-                                commonLogFormat
+                                CommonLogFormat
                                     Access logs in CLF format
-                                dateAutodetect
+                                DateAutodetect
                                     Detect which other handler to use
-                                dateAutodetectPerLine
+                                DateAutodetectPerLine
                                     As dateAutodetect, but does its thing on
                                     every line. Use if you have a mix of
                                     different line formats in there.
-                                syslog
+                                Syslog
                                     Normal syslog format, eg. /var/log/messages
-                                universalSortableLog
+                                UniversalSortableLog
                                     Lines starting with a date like
                                     "1999-12-31 23:59:59"
 

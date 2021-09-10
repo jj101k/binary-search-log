@@ -1,7 +1,7 @@
-import * as Errors from "../Errors"
-import { Base } from "./Base"
+import * as Errors from "../../Errors"
+import { Base as AnyBase } from "../Base"
 
-export abstract class DateBase extends Base<Date> {
+export abstract class Base extends AnyBase<Date> {
     /**
      *
      */
