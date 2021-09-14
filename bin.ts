@@ -30,7 +30,7 @@ const options = getopts(process.argv.slice(2), {
     },
     boolean: ["h", "s"],
     default: {
-        "f": "dateAutodetect"
+        "f": "DateAutodetect"
     },
     string: ["a", "b", "f"],
 })
