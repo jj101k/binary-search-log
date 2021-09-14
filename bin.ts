@@ -41,9 +41,11 @@ const lowString = options["after-date"]
 const highString = options["before-date"]
 const sampleConsumer = options["sample-consumer"]
 
+const programName = "binary-search-log"
+
 function help() {
     const message = `
-Usage: ${process.argv[1]} [--after-date DATE] [--before-date DATE]
+Usage: ${programName} [--after-date DATE] [--before-date DATE]
     [--format FORMAT] [--help] [-s] FILENAME...
 
 Finds log file lines between the supplied before and after dates.
