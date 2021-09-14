@@ -84,7 +84,7 @@ Finds log file lines between the supplied before and after dates.
             }
         ).join("\n")
     )
-    process.stderr.write(message)
+    process.stdout.write(message)
 }
 
 if(options["help"]) {
