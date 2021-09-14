@@ -8,6 +8,20 @@ type nonAbstractBinarySearchTester<T> = {
 
 export class Factory {
     /**
+     * The date handlers as a name-description map
+     */
+    static get dateHandlerDescriptions() {
+        const out = new Map<string, string>()
+        for(const [name, handlerClass] of Object.entries(BinarySearchTester.Date.Factory.dateHandlers)) {
+            out.set(name, handlerClass.description)
+        }
+        for(const [name, handlerClass] of Object.entries(BinarySearchTester.Autodetect.Date.Factory.generalDateHandlers)) {
+            out.set(name, handlerClass.description)
+        }
+        return out
+    }
+
+    /**
      *
      * @param by
      * @throws

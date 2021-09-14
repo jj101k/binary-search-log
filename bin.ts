@@ -62,19 +62,7 @@ Finds log file lines between the supplied before and after dates.
                             should work for most cases (by picking one of the
                             others). The handlers are:
 
-                                CommonLogFormat
-                                    Access logs in CLF format
-                                DateAutodetect
-                                    Detect which other handler to use
-                                DateAutodetectPerLine
-                                    As dateAutodetect, but does its thing on
-                                    every line. Use if you have a mix of
-                                    different line formats in there.
-                                Syslog
-                                    Normal syslog format, eg. /var/log/messages
-                                UniversalSortableLog
-                                    Lines starting with a date like
-                                    "1999-12-31 23:59:59"
+                                {{ handlers }}
 
     --help              -h  This message
 
@@ -85,6 +73,17 @@ Finds log file lines between the supplied before and after dates.
     `
     .replace(/^[ ]+/g, "")
     .replace(/[ ]+$/, "\n\n")
+    .replace(
+        /^([ ]*){{ handlers }}/m,
+        (all, $1) => [...Factory.dateHandlerDescriptions.entries()].map(
+            ([k, v]) => {
+                const prefix = $1 + "    "
+                const viewWidth = 80
+                const pattern = new RegExp(`(.{${viewWidth - prefix.length - 4},${viewWidth - prefix.length}})[ ]`, "g")
+                return `${$1}${k}\n` + prefix + v.replace(pattern, `$1\n${prefix}`)
+            }
+        ).join("\n")
+    )
     process.stderr.write(message)
 }
 

@@ -8,6 +8,7 @@ export class Factory {
      *
      */
     static generalDateHandlers: {[name: string]: {
+        description: string,
         new(l: Date | null, h: Date | null, r?: Date): TesterBase<Date>
     }} = {
         DateAutodetect,

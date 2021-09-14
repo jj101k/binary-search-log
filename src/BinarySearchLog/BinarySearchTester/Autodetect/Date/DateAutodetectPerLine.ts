@@ -3,6 +3,7 @@ import { Base } from "../../Base"
 import { Factory } from "../../Date/Factory"
 
 export class DateAutodetectPerLine extends Base<Date> {
+    static description = "As dateAutodetect, but does its thing on every line. Use if you have a mix of different line formats in there."
 
     linePattern = /.*/
 

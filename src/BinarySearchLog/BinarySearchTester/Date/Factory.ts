@@ -9,6 +9,7 @@ export class Factory {
      *
      */
     static dateHandlers: {[name: string]: {
+        description: string,
         new(l: Date | null, h: Date | null, r?: Date): Base
     }} = {
         CommonLogFormat,
