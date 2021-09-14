@@ -19,14 +19,11 @@ magnitude is 31 (or 9). It's a LOT faster.
 ## Limitations
 
 This relies on the lines being in order, which usually means timestamped on
-entry. If they're timestamped at some other point - and traditional Apache
-access logs are like that - you'll get inconsistent results. In general for
-these cases you will want to search for a point that's a bit earlier. Future
-versions of this tool might mitigate this by gathering multiple entries.
+entry.
 
-This fundamentally relies on having normal seek() behaviour. If your source does
-not support seek() at all (eg. .gz data) or emulates seek() via straight-line
-read, you can expect that you'd have the same performance as a straight search.
+This also relies on having normal seek() behaviour. If your source does not
+support seek() at all (eg. .gz data) or emulates seek() via straight-line read,
+you can expect that you'd have the same performance as a straight search.
 
 ## Quick Start (Code)
 
@@ -40,7 +37,7 @@ const finder = new lineFinder(
     filename
 )
 for await (const line of finder.readLines()) {
-    process.stdout.write(block)
+    process.stdout.write(line)
 }
 finder.finish()
 ```
@@ -54,4 +51,34 @@ you have random content, you can expect to get a parse failure exception.
 
 ### What if each line is extremely long?
 
-If it's over 1MiB, you'll get an exception. Anything below that should work fine.
+If it's over 1MiB, you'll get an exception. Anything below that should work
+fine.
+
+### What if it's not completely ordered?
+
+In some cases with source-supplied timestamps and multiple writers, you might
+have a timestamp which deviates from the insertion time, either because it
+refers to some non-contemporary value (eg. HTTP request start time) or is
+buffered before insertion.
+
+Where that's the case, this may end up selecting the wrong start or end points,
+but even the *right* start and end points might not contain the line(s) you're
+seeking. In general for these cases you will want to start at a point that's a
+bit earlier and end at a point that's a bit later - if you pick positions that
+are at the maximum expected skew from the intended points, you should be fine.
+Future versions of this tool might mitigate the behaviour for inconsistently
+ordered files, eg. by applying some fuzz to the search.
+
+## Supported File Formats
+
+At the time of writing, this supports:
+
+1. *Syslog*: syslog (or at least, some versions of it). Keep in mind that if you have
+   `journalctl`, that will probably work better for you.
+2. *CommonLogFormat*: CLF (Common Log Format) access logs, as you'd get from Apache HTTPd
+3. *UniversalSortableLog*: Logs in Universal Sortable format, which start with
+   dates like "1999-12-31 23:59:59Z".
+
+If you have a file in an unknown but supported date format, you can use
+*DateAutodetect* or, if it's in a variety of supported date formats,
+*DateAutodetectPerLine*.
