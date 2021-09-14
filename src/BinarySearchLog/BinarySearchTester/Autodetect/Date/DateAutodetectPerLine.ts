@@ -1,8 +1,9 @@
-import * as Errors from "../../Errors"
-import { Base } from "../Base"
-import { Factory } from "./Factory"
+import * as Errors from "../../../Errors"
+import { Base } from "../../Base"
+import { Factory } from "../../Date/Factory"
 
 export class DateAutodetectPerLine extends Base<Date> {
+
     linePattern = /.*/
 
     /**

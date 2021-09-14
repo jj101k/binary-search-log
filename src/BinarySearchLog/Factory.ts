@@ -14,7 +14,7 @@ export class Factory {
      * @returns
      */
     public static getBinarySearchDateTester(by: string) {
-        return BinarySearchTester.Date.Factory.getGeneralSearchTester(by)
+        return BinarySearchTester.Autodetect.Date.Factory.getGeneralSearchTester(by)
     }
 
     /**

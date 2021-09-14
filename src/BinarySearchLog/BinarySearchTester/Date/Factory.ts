@@ -3,26 +3,17 @@ import { CommonLogFormat } from "./CommonLogFormat"
 import { Syslog } from "./Syslog"
 import { UniversalSortableLog } from "./UniversalSortableLog"
 import { Base } from "./Base"
-import { Base as TesterBase } from "../Base"
-import { DateAutodetect } from "./DateAutodetect"
-import { DateAutodetectPerLine } from "./DateAutodetectPerLine"
 
 export class Factory {
     /**
      *
      */
-    static dateHandlers: {[name: string]: {new(l: Date | null, h: Date | null, r?: Date): Base}} = {
+    static dateHandlers: {[name: string]: {
+        new(l: Date | null, h: Date | null, r?: Date): Base
+    }} = {
         CommonLogFormat,
         Syslog,
         UniversalSortableLog,
-    }
-
-    /**
-     *
-     */
-    static generalDateHandlers: {[name: string]: {new(l: Date | null, h: Date | null, r?: Date): TesterBase<Date>}} = {
-        DateAutodetect,
-        DateAutodetectPerLine,
     }
 
     /**
@@ -37,15 +28,5 @@ export class Factory {
             throw new Errors.Arguments(`No binary search tester named ${by}`)
         }
         return c
-    }
-
-    /**
-     *
-     * @param by
-     * @throws
-     * @returns
-     */
-    public static getGeneralSearchTester(by: string) {
-        return Factory.generalDateHandlers[by] || this.getSearchTester(by)
     }
 }
