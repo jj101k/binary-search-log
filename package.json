@@ -7,8 +7,8 @@
     "binary-search-log": "dist/bin.js"
   },
   "scripts": {
-    "build": "tsc",
-    "prepare": "rm -rf dist; tsc",
+    "build": "tsc; chmod a+x dist/bin.js",
+    "prepare": "rm -rf dist; tsc; chmod a+x dist/bin.js",
     "rebuild-logs": "tsc && node ./dist/test/util/rebuild-logs.js",
     "test": "mocha --require ts-node/register test/**/*.test.ts"
   },
