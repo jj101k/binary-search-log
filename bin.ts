@@ -42,7 +42,7 @@ const highString = options["before-date"]
 const sampleConsumer = options["sample-consumer"]
 
 function help() {
-    process.stderr.write(`
+    const message = `
 Usage: ${process.argv[1]} [--after-date DATE] [--before-date DATE]
     [--format FORMAT] [--help] [-s] FILENAME...
 
@@ -82,7 +82,10 @@ Finds log file lines between the supplied before and after dates.
                             intended for general use, and is instead present
                             as a reference for people who want to use this
                             package's API directly.
-    `.replace(/^\s+/g, "").replace(/\s+$/, "\n\n"))
+    `
+    .replace(/^[ ]+/g, "")
+    .replace(/[ ]+$/, "\n\n")
+    process.stderr.write(message)
 }
 
 if(options["help"]) {
