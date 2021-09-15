@@ -29,7 +29,7 @@ you can expect that you'd have the same performance as a straight search.
 
 ```js
 import {Factory} from "binary-search-log"
-const binarySearchTester = Factory.getBinarySearchDateTester("dateAutodetect")
+const binarySearchTester = Factory.getBinarySearchDateTester("DateAutodetect")
 const lineFinder = Factory.getLineFinder()
 
 const finder = new lineFinder(
