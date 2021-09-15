@@ -5,7 +5,7 @@ import { Factory } from "../../index"
 describe("Extremes", () => {
     const byByteFinder = Factory.getLineFinder("byte")
     const byLineFinder = Factory.getLineFinder("line")
-    const binarySearchTester = Factory.getBinarySearchNumberTester("startingTimestamp")
+    const binarySearchTester = Factory.getBinarySearchNumberTester("StartingTimestamp")
     describe("Does not fail on empty files", () => {
         const exampleEmptyFile = __dirname + "/../data/empty.log.example"
         it("Does not fail on empty files (by-line)", async () => {

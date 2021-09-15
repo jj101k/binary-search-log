@@ -5,7 +5,7 @@ import * as TestLogFileData from "../src/TestLogFileData"
 
 describe("File-by-byte tests", () => {
     const lineFinder = Factory.getLineFinder("byte")
-    const binarySearchTester = Factory.getBinarySearchNumberTester("startingTimestamp")
+    const binarySearchTester = Factory.getBinarySearchNumberTester("StartingTimestamp")
     const example1To100LogFile = __dirname + "/../data/range1-100.log.example"
     it("Can skip out-of-range files", async () => {
         const file = new lineFinder(

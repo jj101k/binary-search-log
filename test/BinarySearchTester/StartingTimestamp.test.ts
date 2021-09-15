@@ -4,7 +4,7 @@ import { Factory } from "../../index"
 
 describe("Date searcher tests (starting timestamp)", () => {
     const lineFinder = Factory.getLineFinder("line")
-    const binarySearchTester = Factory.getBinarySearchNumberTester("startingTimestamp")
+    const binarySearchTester = Factory.getBinarySearchNumberTester("StartingTimestamp")
     const example1To100LogFile = __dirname + "/../data/range1-100.log.example"
     describe("Finish-only", () => {
         it("Can skip out-of-range files (finish)", async () => {

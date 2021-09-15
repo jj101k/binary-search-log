@@ -38,7 +38,7 @@ export class Factory {
      */
     public static getBinarySearchNumberTester(by: string) {
         const binarySearchTesters: {[name: string]: nonAbstractBinarySearchTester<number>} = {
-            startingTimestamp: BinarySearchTester.StartingTimestamp,
+            StartingTimestamp: BinarySearchTester.StartingTimestamp,
         }
         const c = binarySearchTesters[by]
         if(!c) {
