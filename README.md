@@ -25,6 +25,17 @@ This also relies on having normal seek() behaviour. If your source does not
 support seek() at all (eg. .gz data) or emulates seek() via straight-line read,
 you can expect that you'd have the same performance as a straight search.
 
+## Quick Start (Command-line)
+
+If you're just using the command-line utility, you can do something like:
+
+```sh
+binary-search-log --after-date 2021-09-01T00:00:00 --before-date 2021-09-09T05:20:00 \
+    --format DateAutodetect /var/log/system.log | less
+```
+
+This does support --help, so you can check for more options that way.
+
 ## Quick Start (Code)
 
 ```js
