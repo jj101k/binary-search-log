@@ -1,7 +1,7 @@
 import * as Errors from "../Errors"
 import { Base } from "./Base"
 
-export class StartingTimestamp extends Base<number> {
+export class StartingNumber extends Base<number> {
     linePattern = /^(\d+)/
 
     /**

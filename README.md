@@ -103,7 +103,7 @@ interface. Using that is like:
 
 ```js
 import {Factory} from "binary-search-log"
-const binarySearchTester = Factory.getBinarySearchNumberTester("StartingTimestamp")
+const binarySearchTester = Factory.getBinarySearchNumberTester("StartingNumber")
 const lineFinder = Factory.getLineFinder()
 
 const finder = new lineFinder(
