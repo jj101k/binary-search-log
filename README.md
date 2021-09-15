@@ -82,3 +82,27 @@ At the time of writing, this supports:
 If you have a file in an unknown but supported date format, you can use
 *DateAutodetect* or, if it's in a variety of supported date formats,
 *DateAutodetectPerLine*.
+
+## Non-Date Formats
+
+This has less-than-complete support for non-date formats if you happen to have
+one of those and it is, again, strictly ordered. However, because the _types_ of
+the constructor arguments are different there, it isn't built through the same
+interface. Using that is like:
+
+```js
+import {Factory} from "binary-search-log"
+const binarySearchTester = Factory.getBinarySearchNumberTester("startingTimestamp")
+const lineFinder = Factory.getLineFinder()
+
+const finder = new lineFinder(
+    new binarySearchTester(low, high),
+    filename
+)
+for await (const line of finder.readLines()) {
+    process.stdout.write(line)
+}
+finder.finish()
+```
+
+At the time of writing, the only such type that's supported is UNIX-like timestamps.
