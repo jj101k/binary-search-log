@@ -24,6 +24,6 @@ export class StartingNumber extends Base<number> {
                 return 0
             }
         }
-        throw new Errors.Parser(`Unable to parse timestamp on: "${line}"`)
+        throw new Errors.Parser(`Unable to parse number on: "${line}"`)
     }
 }

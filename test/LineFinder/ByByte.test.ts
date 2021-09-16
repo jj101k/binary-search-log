@@ -77,8 +77,8 @@ describe("File-by-byte tests", () => {
             let seenLines = 0
             const start = new Date()
             for await(const line of file.readLines()) {
-                const timestamp = +line.replace(/ .*/, "")
-                assert(timestamp >= largeLogFileLines / 2 + 10 && timestamp <= largeLogFileLines / 2 + 20)
+                const n = +line.replace(/ .*/, "")
+                assert(n >= largeLogFileLines / 2 + 10 && n <= largeLogFileLines / 2 + 20)
                 seenLines++
             }
             file.finish()

@@ -15,11 +15,11 @@ export class Number extends Base {
         for(let i = 0; i < this.lines / this.writeBlockLines; i++) {
             let block = ""
             for(let j = 0; j < this.writeBlockLines; j++) {
-                let timestamp = i * this.writeBlockLines + j + 1
-                if(timestamp > this.lines) {
+                let n = i * this.writeBlockLines + j + 1
+                if(n > this.lines) {
                     break
                 }
-                block += `${timestamp} ${this.getContent(timestamp)}\n`
+                block += `${n} ${this.getContent(n)}\n`
             }
             fs.writeSync(fileHandle, block)
         }
