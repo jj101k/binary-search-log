@@ -7,43 +7,46 @@ describe("File-by-byte tests", () => {
     const lineFinder = Factory.getLineFinder("byte")
     const binarySearchTester = Factory.getBinarySearchNumberTester("StartingNumber")
     const example1To100LogFile = __dirname + "/../data/range1-100.log.example"
+
+    /**
+     *
+     * @param label
+     * @param bottomPosition
+     * @param topPosition
+     * @param expectedLines
+     */
+    function testLinesSeen(label: string, bottomPosition: number, topPosition: number, expectedLines: number) {
+        it(`${label} (${bottomPosition} to ${topPosition})`, async () => {
+            const file = new lineFinder(
+                new binarySearchTester(bottomPosition, topPosition),
+                example1To100LogFile
+            )
+            let seenLines = 0
+            for await(const line of file.readLines()) {
+                const parts = line.split(/ /)
+                const n = +parts[0]
+                assert(
+                    n <= topPosition && n >= bottomPosition,
+                    `Line ${line} is between ${topPosition} and ${bottomPosition}`
+                )
+                seenLines++
+            }
+            file.finish()
+            assert.equal(expectedLines, seenLines, `${expectedLines} Matching lines seen`)
+        })
+    }
+
     const topEdge = 100
     const bottomEdge = 1
-    it("Can skip out-of-range files", async () => {
-        const file = new lineFinder(
-            new binarySearchTester(topEdge + 10, topEdge + 20),
-            example1To100LogFile
-        )
-        let seenLines = 0
-        for await(const line of file.readLines()) {
-            seenLines++
-        }
-        file.finish()
-        assert.equal(seenLines, 0, "No lines seen")
-    })
+    testLinesSeen("Can skip out-of-range files", topEdge + 10, topEdge + 20, 0)
     for(const bottomOffset of [-1, 0, 1]) {
-        const bottomPosition = bottomEdge + bottomOffset
         for(const topOffset of [-1, 0, 1]) {
-            const topPosition = topEdge + topOffset
-            const expectedLines = topEdge + Math.min(topOffset, 0) - bottomEdge - Math.max(bottomOffset, 0) + 1
-            it(`Can read in-range files (${bottomPosition} to ${topPosition})`, async () => {
-                const file = new lineFinder(
-                    new binarySearchTester(bottomPosition, topPosition),
-                    example1To100LogFile
-                )
-                let seenLines = 0
-                for await(const line of file.readLines()) {
-                    const parts = line.split(/ /)
-                    const n = +parts[0]
-                    assert(
-                        n <= topPosition && n >= bottomPosition,
-                        `Line ${line} is between ${topPosition} and ${bottomPosition}`
-                    )
-                    seenLines++
-                }
-                file.finish()
-                assert.equal(expectedLines, seenLines, `${expectedLines} Matching lines seen`)
-            })
+            testLinesSeen(
+                "Can read in-range files",
+                bottomEdge + bottomOffset,
+                topEdge + topOffset,
+                topEdge + Math.min(topOffset, 0) - bottomEdge - Math.max(bottomOffset, 0) + 1
+            )
         }
     }
 
