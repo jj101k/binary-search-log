@@ -1,6 +1,7 @@
 import assert from "assert"
 import {before, describe, it} from "mocha"
 import { Factory } from "../../index"
+import { TestHelper } from "../src/TestHelper"
 import * as TestLogFileData from "../src/TestLogFileData"
 
 describe("File-by-byte tests", () => {
@@ -8,40 +9,14 @@ describe("File-by-byte tests", () => {
     const binarySearchTester = Factory.getBinarySearchNumberTester("StartingNumber")
     const example1To100LogFile = __dirname + "/../data/range1-100.log.example"
 
-    /**
-     *
-     * @param label
-     * @param bottomPosition
-     * @param topPosition
-     * @param expectedLines
-     */
-    function testLinesSeen(label: string, bottomPosition: number, topPosition: number, expectedLines: number) {
-        it(`${label} (${bottomPosition} to ${topPosition})`, async () => {
-            const file = new lineFinder(
-                new binarySearchTester(bottomPosition, topPosition),
-                example1To100LogFile
-            )
-            let seenLines = 0
-            for await(const line of file.readLines()) {
-                const parts = line.split(/ /)
-                const n = +parts[0]
-                assert(
-                    n <= topPosition && n >= bottomPosition,
-                    `Line ${line} is between ${topPosition} and ${bottomPosition}`
-                )
-                seenLines++
-            }
-            file.finish()
-            assert.equal(expectedLines, seenLines, `${expectedLines} Matching lines seen`)
-        })
-    }
+    const testHelper = new TestHelper(lineFinder, binarySearchTester, example1To100LogFile)
 
     const topEdge = 100
     const bottomEdge = 1
-    testLinesSeen("Can skip out-of-range files", topEdge + 10, topEdge + 20, 0)
+    testHelper.testLinesSeen("Can skip out-of-range files", topEdge + 10, topEdge + 20, 0)
     for(const bottomOffset of [-1, 0, 1]) {
         for(const topOffset of [-1, 0, 1]) {
-            testLinesSeen(
+            testHelper.testLinesSeen(
                 "Can read in-range files",
                 bottomEdge + bottomOffset,
                 topEdge + topOffset,
@@ -51,7 +26,7 @@ describe("File-by-byte tests", () => {
     }
 
     for(const bottomOffset of [0, 1]) {
-        testLinesSeen(
+        testHelper.testLinesSeen(
             "Can read edge files",
             bottomEdge - 1,
             bottomEdge + bottomOffset,
@@ -60,7 +35,7 @@ describe("File-by-byte tests", () => {
     }
 
     for(const topOffset of [-1, 0]) {
-        testLinesSeen(
+        testHelper.testLinesSeen(
             "Can read edge files",
             topEdge + topOffset,
             topEdge + 1,
