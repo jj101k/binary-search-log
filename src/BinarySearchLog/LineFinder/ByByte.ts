@@ -22,8 +22,9 @@ export class ByByte extends Base {
         } while(after > before + 1)
 
         /*
-         * @todo this should really filter to the line offsets and instead abort
-         * once there is only one line boundary left
+         * This reads forward one line on finish, because the quirks
+         * of looking for the first COMPLETE line mean that this will
+         * always produce a result which is one line early.
          */
 
         const position = after
