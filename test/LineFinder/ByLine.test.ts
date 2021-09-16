@@ -1,63 +1,47 @@
 import assert from "assert"
 import {before, describe, it} from "mocha"
 import { Factory } from "../../index"
+import { TestHelper } from "../src/TestHelper"
 import * as TestLogFileData from "../src/TestLogFileData"
 
 describe("File-by-line tests", () => {
     const lineFinder = Factory.getLineFinder("line")
     const binarySearchTester = Factory.getBinarySearchNumberTester("StartingNumber")
     const example1To100LogFile = __dirname + "/../data/range1-100.log.example"
-    it("Can skip out-of-range files", async () => {
-        const file = new lineFinder(
-            new binarySearchTester(1000, 3000),
-            example1To100LogFile
-        )
-        let seenLines = 0
-        for await(const line of file.readLines()) {
-            seenLines++
+
+    const testHelper = new TestHelper(lineFinder, binarySearchTester, example1To100LogFile)
+
+    const topEdge = 100
+    const bottomEdge = 1
+    testHelper.testLinesSeen("Can skip out-of-range files", topEdge + 10, topEdge + 20, 0)
+    for(const bottomOffset of [-1, 0, 1]) {
+        for(const topOffset of [-1, 0, 1]) {
+            testHelper.testLinesSeen(
+                "Can read in-range files",
+                bottomEdge + bottomOffset,
+                topEdge + topOffset,
+                topEdge + Math.min(topOffset, 0) - bottomEdge - Math.max(bottomOffset, 0) + 1
+            )
         }
-        file.finish()
-        assert.equal(seenLines, 0, "No lines seen")
-    })
-    it("Can read in-range files (start)", async () => {
-        const file = new lineFinder(
-            new binarySearchTester(-10, 30),
-            example1To100LogFile
+    }
+
+    for(const bottomOffset of [0, 1]) {
+        testHelper.testLinesSeen(
+            "Can read edge files",
+            bottomEdge - 1,
+            bottomEdge + bottomOffset,
+            bottomOffset + 1
         )
-        let seenLines = 0
-        for await(const line of file.readLines()) {
-            assert.match(line, /^(?:[1-2]?[0-9]|30) /, `Line ${line} is in range`)
-            seenLines++
-        }
-        file.finish()
-        assert.equal(seenLines, 30, "Matching lines seen")
-    })
-    it("Can read in-range files (finish)", async () => {
-        const file = new lineFinder(
-            new binarySearchTester(60, 110),
-            example1To100LogFile
+    }
+
+    for(const topOffset of [-1, 0]) {
+        testHelper.testLinesSeen(
+            "Can read edge files",
+            topEdge + topOffset,
+            topEdge + 1,
+            1 - topOffset
         )
-        let seenLines = 0
-        for await(const line of file.readLines()) {
-            assert.match(line, /^(?:[6-9]?[0-9]|100) /, `Line ${line} is in range`)
-            seenLines++
-        }
-        file.finish()
-        assert.equal(seenLines, 41, "Matching lines seen")
-    })
-    it("Can read in-range files (middle)", async () => {
-        const file = new lineFinder(
-            new binarySearchTester(10, 20),
-            example1To100LogFile
-        )
-        let seenLines = 0
-        for await(const line of file.readLines()) {
-            assert.match(line, /^(?:1[0-9]|20) /, `Line ${line} is in range`)
-            seenLines++
-        }
-        file.finish()
-        assert.equal(seenLines, 11, "Matching lines seen")
-    })
+    }
 
     // You can remove .skip below if you want to try this.
     describe.skip("large file tests", () => {
