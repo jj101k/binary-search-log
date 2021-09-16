@@ -9,7 +9,7 @@ describe("File-by-byte tests", () => {
     const example1To100LogFile = __dirname + "/../data/range1-100.log.example"
     const topEdge = 100
     const bottomEdge = 1
-    it.skip("Can skip out-of-range files", async () => {
+    it("Can skip out-of-range files", async () => {
         const file = new lineFinder(
             new binarySearchTester(topEdge + 10, topEdge + 20),
             example1To100LogFile
