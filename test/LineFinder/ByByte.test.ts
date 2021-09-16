@@ -50,6 +50,24 @@ describe("File-by-byte tests", () => {
         }
     }
 
+    for(const bottomOffset of [0, 1]) {
+        testLinesSeen(
+            "Can read edge files",
+            bottomEdge - 1,
+            bottomEdge + bottomOffset,
+            bottomOffset + 1
+        )
+    }
+
+    for(const topOffset of [-1, 0]) {
+        testLinesSeen(
+            "Can read edge files",
+            topEdge + topOffset,
+            topEdge + 1,
+            1 - topOffset
+        )
+    }
+
     // You can remove .skip below if you want to try this.
     describe.skip("large file tests", () => {
         const largeLogFileLines = 2_000_000
