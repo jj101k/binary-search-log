@@ -55,11 +55,24 @@ export class ByLine extends Base {
             currentPartialLine += contents
             const lines = currentPartialLine.split(this.capturingLineEnding)
             if(lines.length > 1 && position == 0) {
+                // This is (line) \n at BOF
                 return {
                     offset: 0,
                     line: lines[0],
                 }
-            } else if(lines.length > 3) {
+            } else if(
+                lines.length > 3 ||
+                (
+                    lines.length > 1 &&
+                    position + currentPartialLine.length >= this.fileLength &&
+                    lines[2].length > 0
+                )
+            ) {
+                // This is (part) \n (line) \n (line)
+                // or (line) \n (line) \n ""
+                // or (part) \n (line) at EOF
+                //
+                // Note that this is NOT (part) \n "" at EOF
                 return {
                     offset: lines[0].length + lines[1].length,
                     line: lines[2],
