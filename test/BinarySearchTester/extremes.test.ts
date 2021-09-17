@@ -60,6 +60,35 @@ describe("Extremes", () => {
             assert.equal(seenLines, 1, "All lines seen")
         })
     })
+    describe("Does not fail with no ending newline (2-line)", () => {
+        const exampleNoNewlineFile = __dirname + "/../data/range1-2-no-end-newline.log.example"
+        for(const target of [1,2]) {
+            it(`By-line: ${target}`, async () => {
+                const file = new byLineFinder(
+                    new binarySearchTester(target, target),
+                    exampleNoNewlineFile
+                )
+                let seenLines = 0
+                for await(const line of file.readLines()) {
+                    seenLines++
+                }
+                file.finish()
+                assert.equal(seenLines, 1, "One line seen")
+            })
+            it(`By-byte: ${target}`, async () => {
+                const file = new byByteFinder(
+                    new binarySearchTester(target, target),
+                    exampleNoNewlineFile
+                )
+                let seenLines = 0
+                for await(const line of file.readLines()) {
+                    seenLines++
+                }
+                file.finish()
+                assert.equal(seenLines, 1, "One line seen")
+            })
+        }
+    })
     it("Does not fail with no ending newline", async () => {
         const exampleNoNewlineFile = __dirname + "/../data/range1-2-no-end-newline.log.example"
         const file = new byLineFinder(
