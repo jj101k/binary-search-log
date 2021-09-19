@@ -14,17 +14,60 @@ export abstract class Base {
     /**
      *
      */
-    private readonly defaultChunkSize = 65536
-
-    /**
-     *
-     */
     private cachedFileLength: number | null = null
 
     /**
      *
      */
+    private readonly defaultChunkSize = 65536
+
+    /**
+     *
+     */
     private openedFile: boolean
+
+    /**
+     *
+     * @param position
+     * @returns
+     */
+    private async readLastLineBackwards(position: number) {
+        let currentPartialLine = ""
+        do {
+            const targetOffset = position - currentPartialLine.length - this.defaultChunkSize
+            const contents = await this.readString(targetOffset)
+
+            currentPartialLine = contents + currentPartialLine
+            const lines = currentPartialLine.split(this.capturingLineEnding)
+            if(lines.length > 2) {
+                return lines[lines.length - 1] || lines[lines.length - 3]
+            } else if(targetOffset <= 0) {
+                return lines[0]
+            }
+        } while(currentPartialLine.length < this.maxLineLength)
+        throw new Errors.LimitExceeded("Maximum line length exceeded")
+    }
+
+    /**
+     *
+     */
+    protected filehandle: number
+
+    /**
+     *
+     */
+    protected readonly maxLineLength = 1024 * 1024
+
+    /**
+     *
+     */
+    protected get fileLength() {
+        if(this.cachedFileLength === null) {
+            const stat = fs.fstatSync(this.filehandle)
+            this.cachedFileLength = stat.size
+        }
+        return this.cachedFileLength
+    }
 
     /**
      * This returns `position` as adjusted to the effective floor or ceiling position.
@@ -39,7 +82,7 @@ export abstract class Base {
      * @param lookEarlier
      * @returns
      */
-     protected async findPosition(lookEarlier: (r: number) => boolean) {
+    protected async findPosition(lookEarlier: (r: number) => boolean) {
         let before = -1
         let after = this.fileLength
         let testPosition = Math.round((before + after) / 2)
@@ -67,58 +110,6 @@ export abstract class Base {
 
         return after
     }
-
-    /**
-     * This is a little different to firstLineInfoForwards in that whether the
-     * ceiling is used is optional.
-     *
-     * @param startPosition
-     * @param ceiling
-     */
-    protected abstract firstLineInfoGivenCeiling(startPosition: number, ceiling: number): Promise<LineInfo>
-
-    /**
-     *
-     * @param position
-     * @returns
-     */
-    private async readLastLineBackwards(position: number) {
-        let currentPartialLine = ""
-        do {
-            const targetOffset = position - currentPartialLine.length - this.defaultChunkSize
-            const contents = await this.readString(targetOffset)
-
-            currentPartialLine = contents + currentPartialLine
-            const lines = currentPartialLine.split(this.capturingLineEnding)
-            if(lines.length > 2) {
-                return lines[lines.length - 1] || lines[lines.length - 3]
-            } else if(targetOffset <= 0) {
-                return lines[0]
-            }
-        } while(currentPartialLine.length < this.maxLineLength)
-        throw new Errors.LimitExceeded("Maximum line length exceeded")
-    }
-
-    /**
-     *
-     */
-    protected get fileLength() {
-        if(this.cachedFileLength === null) {
-            const stat = fs.fstatSync(this.filehandle)
-            this.cachedFileLength = stat.size
-        }
-        return this.cachedFileLength
-    }
-
-    /**
-     *
-     */
-    protected readonly maxLineLength = 1024 * 1024
-
-    /**
-     *
-     */
-    protected filehandle: number
 
     /**
      *
@@ -166,6 +157,15 @@ export abstract class Base {
         } while(currentPartialLine.length < this.maxLineLength)
         throw new Errors.LimitExceeded("Maximum line length exceeded")
     }
+
+    /**
+     * This is a little different to firstLineInfoForwards in that whether the
+     * ceiling is used is optional.
+     *
+     * @param startPosition
+     * @param ceiling
+     */
+    protected abstract firstLineInfoGivenCeiling(startPosition: number, ceiling: number): Promise<LineInfo>
 
 
     /**
