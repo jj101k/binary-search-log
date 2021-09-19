@@ -80,7 +80,47 @@ export abstract class Base {
      * @param finishBeforePosition
      * @returns
      */
-    protected abstract firstLineInfoForwards(position: number, finishBeforePosition?: number | null): Promise<{offset: number, line: string | null}>
+     protected async firstLineInfoForwards(position: number, finishBeforePosition: number | null = null) {
+        let currentPartialLine = ""
+        do {
+            const offset = position + currentPartialLine.length
+            const contents = await this.readString(offset, finishBeforePosition)
+            if(!contents) {
+                return {
+                    offset: 0,
+                    line: (position == 0 && (offset == this.fileLength - 1 || offset == this.fileLength)) ? currentPartialLine : null,
+                }
+            }
+            currentPartialLine += contents
+            const lines = currentPartialLine.split(this.capturingLineEnding)
+            if(lines.length > 1 && position == 0) {
+                // This is (line) \n at BOF
+                return {
+                    offset: 0,
+                    line: lines[0],
+                }
+            } else if(
+                lines.length > 3 ||
+                (
+                    lines.length > 1 &&
+                    position + currentPartialLine.length >= this.fileLength &&
+                    lines[2].length > 0
+                )
+            ) {
+                // This is (part) \n (line) \n (line)
+                // or (line) \n (line) \n ""
+                // or (part) \n (line) at EOF
+                //
+                // Note that this is NOT (part) \n "" at EOF
+                return {
+                    offset: lines[0].length + lines[1].length,
+                    line: lines[2],
+                }
+            }
+        } while(currentPartialLine.length < this.maxLineLength)
+        throw new Errors.LimitExceeded("Maximum line length exceeded")
+    }
+
 
     /**
      * Reads from the file.
