@@ -3,6 +3,8 @@ import * as util from "util"
 import * as BinarySearchTester from "../BinarySearchTester"
 import * as Errors from "../Errors"
 import { UNIXLine } from "../EOLPattern"
+import { LineInfo } from "./LineInfo"
+
 export abstract class Base {
     /**
      *
@@ -25,11 +27,55 @@ export abstract class Base {
     private openedFile: boolean
 
     /**
+     * This returns `position` as adjusted to the effective floor or ceiling position.
+     *
+     * @param position
+     * @param lineInfo
+     */
+    protected abstract adjustedPosition(position: number, lineInfo: LineInfo): number
+
+    /**
      *
      * @param lookEarlier
      * @returns
      */
-    protected abstract findPosition(lookEarlier: (r: number) => boolean): Promise<number>
+     protected async findPosition(lookEarlier: (r: number) => boolean) {
+        let before = -1
+        let after = this.fileLength
+        let testPosition = Math.round((before + after) / 2)
+        do {
+            const lineInfo = await this.firstLineInfoGivenCeiling(testPosition, after)
+            if(lineInfo.line === null) {
+                if(before + 1 == testPosition) {
+                    // No detected line, no further revision possible
+                    break
+                } else {
+                    // No detected line, look earlier but keep after position
+                    testPosition = Math.round((before + testPosition) / 2)
+                }
+            } else {
+                testPosition = this.adjustedPosition(testPosition, lineInfo)
+                const state = this.binarySearchTester.getRelativeLinePosition(lineInfo.line)
+                if(lookEarlier(state)) {
+                    after = testPosition
+                } else {
+                    before = testPosition
+                }
+                testPosition = Math.round((before + after) / 2)
+            }
+        } while(after > before + 1)
+
+        return after
+    }
+
+    /**
+     * This is a little different to firstLineInfoForwards in that whether the
+     * ceiling is used is optional.
+     *
+     * @param startPosition
+     * @param ceiling
+     */
+    protected abstract firstLineInfoGivenCeiling(startPosition: number, ceiling: number): Promise<LineInfo>
 
     /**
      *
@@ -80,7 +126,7 @@ export abstract class Base {
      * @param finishBeforePosition
      * @returns
      */
-     protected async firstLineInfoForwards(position: number, finishBeforePosition: number | null = null) {
+    protected async firstLineInfoForwards(position: number, finishBeforePosition: number | null = null): Promise<LineInfo> {
         let currentPartialLine = ""
         do {
             const offset = position + currentPartialLine.length

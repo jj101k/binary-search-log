@@ -1,36 +1,12 @@
-import * as Errors from "../Errors"
 import { Base } from "./Base"
+import { LineInfo } from "./LineInfo"
 export class ByByte extends Base {
-    /**
-     *
-     * @param lookEarlier
-     * @returns
-     */
-    protected async findPosition(lookEarlier: (r: number) => boolean) {
-        let before = -1
-        let after = this.fileLength
-        let testPosition = Math.round((before + after) / 2)
+    protected adjustedPosition(position: number, lineInfo: LineInfo): number {
+        return position + 0
+    }
 
-        do {
-            const {line: line} = await this.firstLineInfoForwards(testPosition)
-            if(line === null) {
-                if(before + 1 == testPosition) {
-                    // No detected line, no further revision possible
-                    break
-                } else {
-                    // No detected line, look earlier but keep after position
-                    testPosition = Math.round((before + testPosition) / 2)
-                }
-            } else {
-                const state = this.binarySearchTester.getRelativeLinePosition(line)
-                if(lookEarlier(state)) {
-                    after = testPosition
-                } else {
-                    before = testPosition
-                }
-                testPosition = Math.round((before + after) / 2)
-            }
-        } while(after > before + 1)
+    protected async findPosition(lookEarlier: (r: number) => boolean) {
+        const after = await super.findPosition(lookEarlier)
 
         /*
          * This reads forward one line on finish, because the quirks
@@ -50,5 +26,9 @@ export class ByByte extends Base {
         const lines = contents.split(this.capturingLineEnding, 2)
 
         return position + lines[0].length + lines[1].length
+    }
+
+    protected firstLineInfoGivenCeiling(testPosition: number, afterPosition: number) {
+        return this.firstLineInfoForwards(testPosition)
     }
 }
