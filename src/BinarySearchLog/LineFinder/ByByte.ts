@@ -9,15 +9,26 @@ export class ByByte extends Base {
     protected async findPosition(lookEarlier: (r: number) => boolean) {
         let before = -1
         let after = this.fileLength
-        let testPosition: number
+        let testPosition = Math.round((before + after) / 2)
+
         do {
-            testPosition = Math.round((before + after) / 2)
             const {line: line} = await this.firstLineInfoForwards(testPosition)
-            const state = this.binarySearchTester.getRelativeLinePosition(line)
-            if(lookEarlier(state)) {
-                after = testPosition
+            if(line === null) {
+                if(before + 1 == testPosition) {
+                    // No detected line, no further revision possible
+                    break
+                } else {
+                    // No detected line, look earlier but keep after position
+                    testPosition = Math.round((before + testPosition) / 2)
+                }
             } else {
-                before = testPosition
+                const state = this.binarySearchTester.getRelativeLinePosition(line)
+                if(lookEarlier(state)) {
+                    after = testPosition
+                } else {
+                    before = testPosition
+                }
+                testPosition = Math.round((before + after) / 2)
             }
         } while(after > before + 1)
 
@@ -55,7 +66,7 @@ export class ByByte extends Base {
             if(!contents) {
                 return {
                     offset: 0,
-                    line: (offset == this.fileLength - 1 || offset == this.fileLength) ? currentPartialLine : "",
+                    line: (position == 0 && (offset == this.fileLength - 1 || offset == this.fileLength)) ? currentPartialLine : null,
                 }
             }
             currentPartialLine += contents
