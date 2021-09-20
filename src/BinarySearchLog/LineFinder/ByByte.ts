@@ -1,10 +1,6 @@
 import { Base } from "./Base"
 import { LineInfo } from "./LineInfo"
 export class ByByte extends Base {
-    protected adjustedPosition(position: number, lineInfo: LineInfo): number {
-        return position + 0
-    }
-
     protected async findPosition(lookEarlier: (r: number) => boolean) {
         const after = await super.findPosition(lookEarlier)
 
@@ -30,5 +26,9 @@ export class ByByte extends Base {
 
     protected firstLineInfoGivenCeiling(testPosition: number, afterPosition: number) {
         return this.firstLineInfoForwards(testPosition)
+    }
+
+    protected lineCeiling(position: number, lineInfo: LineInfo): number {
+        return position + 0
     }
 }

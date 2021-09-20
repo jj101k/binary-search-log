@@ -70,14 +70,6 @@ export abstract class Base {
     }
 
     /**
-     * This returns `position` as adjusted to the effective floor or ceiling position.
-     *
-     * @param position
-     * @param lineInfo
-     */
-    protected abstract adjustedPosition(position: number, lineInfo: LineInfo): number
-
-    /**
      *
      * @param lookEarlier
      * @returns
@@ -97,7 +89,7 @@ export abstract class Base {
                     testPosition = Math.round((before + testPosition) / 2)
                 }
             } else {
-                testPosition = this.adjustedPosition(testPosition, lineInfo)
+                testPosition = this.lineCeiling(testPosition, lineInfo)
                 const state = this.binarySearchTester.getRelativeLinePosition(lineInfo.line)
                 if(lookEarlier(state)) {
                     after = testPosition
@@ -167,6 +159,13 @@ export abstract class Base {
      */
     protected abstract firstLineInfoGivenCeiling(startPosition: number, ceiling: number): Promise<LineInfo>
 
+    /**
+     * This returns `position` as adjusted to the effective floor or ceiling position.
+     *
+     * @param position
+     * @param lineInfo
+     */
+    protected abstract lineCeiling(position: number, lineInfo: LineInfo): number
 
     /**
      * Reads from the file.
