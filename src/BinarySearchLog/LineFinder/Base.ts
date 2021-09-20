@@ -79,6 +79,7 @@ export abstract class Base {
         let after = this.fileLength
         let lineCeiling = after
         let testPosition = Math.round((before + after) / 2)
+        let lineStartsBefore = after
         do {
             const lineInfo = await this.firstLineInfoGivenCeiling(testPosition, lineCeiling)
             if(lineInfo.line === null) {
@@ -87,14 +88,17 @@ export abstract class Base {
                     break
                 } else {
                     // No detected line, look earlier but keep after position
+                    lineStartsBefore = testPosition
                     testPosition = Math.round((before + testPosition) / 2)
                 }
             } else {
                 const state = this.binarySearchTester.getRelativeLinePosition(lineInfo.line)
                 if(lookEarlier(state)) {
                     after = testPosition
+                    lineStartsBefore = testPosition
                     lineCeiling = this.lineCeiling(testPosition, lineInfo)
                 } else {
+                    after = lineStartsBefore
                     before = testPosition
                 }
                 testPosition = Math.round((before + after) / 2)
