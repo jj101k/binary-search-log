@@ -77,9 +77,10 @@ export abstract class Base {
     protected async findPosition(lookEarlier: (r: number) => boolean) {
         let before = -1
         let after = this.fileLength
+        let lineCeiling = after
         let testPosition = Math.round((before + after) / 2)
         do {
-            const lineInfo = await this.firstLineInfoGivenCeiling(testPosition, after)
+            const lineInfo = await this.firstLineInfoGivenCeiling(testPosition, lineCeiling)
             if(lineInfo.line === null) {
                 if(before + 1 == testPosition) {
                     // No detected line, no further revision possible
@@ -89,10 +90,10 @@ export abstract class Base {
                     testPosition = Math.round((before + testPosition) / 2)
                 }
             } else {
-                testPosition = this.lineCeiling(testPosition, lineInfo)
                 const state = this.binarySearchTester.getRelativeLinePosition(lineInfo.line)
                 if(lookEarlier(state)) {
                     after = testPosition
+                    lineCeiling = this.lineCeiling(testPosition, lineInfo)
                 } else {
                     before = testPosition
                 }
@@ -100,7 +101,7 @@ export abstract class Base {
             }
         } while(after > before + 1)
 
-        return after
+        return lineCeiling
     }
 
     /**
