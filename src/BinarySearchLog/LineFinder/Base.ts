@@ -77,8 +77,14 @@ export abstract class Base {
     protected async findPosition(lookEarlier: (r: number) => boolean) {
         let before = -1
         let after = this.fileLength
-        let lineCeiling = after
         let testPosition = Math.round((before + after) / 2)
+        /**
+         * This is the point past which no line ending will be sought
+         */
+        let lineCeiling = after
+        /**
+         * This is a point before which the line in the middle of before-after starts.
+         */
         let lineStartsBefore = after
         do {
             const lineInfo = await this.firstLineInfoGivenCeiling(testPosition, lineCeiling)
