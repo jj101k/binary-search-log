@@ -22,6 +22,15 @@ export class Factory {
     }
 
     /**
+     * The number handlers as a name-description map
+     */
+    static get numberHandlerDescriptions() {
+        return new Map([
+            ["StartingNumber", BinarySearchTester.StartingNumber.description]
+        ])
+    }
+
+    /**
      *
      * @param by
      * @throws

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { EOLPattern, Errors, Factory } from "./index"
+import { BinarySearchTester, EOLPattern, Errors, Factory } from "./index"
 import getopts from "getopts"
 
 /**
@@ -22,51 +22,58 @@ function dateOrNull(dateIn: string | null | undefined) {
 
 const options = getopts(process.argv.slice(2), {
     alias: {
-      "after-date": "a",
+      "after": "a",
       "before-date": "b",
       "format": "f",
       "help": "h",
       "no-lines": "n",
-      "sample-consumer": "s"
+      "sample-consumer": "s",
+      "type": "t",
     },
     boolean: ["h", "s"],
     default: {
         "f": "DateAutodetect"
     },
-    string: ["a", "b", "f"],
+    string: ["a", "b", "f", "t"],
 })
 
 const filenames = options._
 const format = options["format"]
-const lowString = options["after-date"]
+const lowString = options["after"]
 const highString = options["before-date"]
 const noLines = options["no-lines"]
 const sampleConsumer = options["sample-consumer"]
+const type = options["type"] || "date"
 
 const programName = "binary-search-log"
 
 function help() {
     const message = `
-Usage: ${programName} [--after-date DATE] [--before-date DATE]
+Usage: ${programName} [--type date] [--after EXPRESSION] [--before EXPRESSION]
     [--format FORMAT] [--help] [-s] FILENAME...
 
 Finds log file lines between the supplied before and after dates.
 
-    --after-date        -a  Sets the date after which lines will be
-                            rejected. Date formats that Javascript can parse
-                            are required, and ISO8601 (eg.
-                            1999-12-31T23:59:59Z) is probably the easiest.
+    --after             -a  Sets the value after which lines will be
+                            rejected. See also --type.
 
-    --before-date       -b  Sets the date before which lines will be
-                            rejected. The format is the same as --after-date
-                            above.
+    --before            -b  Sets the value before which lines will be
+                            rejected.  See also --type.
 
-    --format            -f  The format of the log line in terms of date
-                            discovery. The default is "dateAutodetect", which
+    --format            -f  The format of the log line in terms of value
+                            discovery. This depends on the option used for
+                            --type.
+
+                            Date: The default is "dateAutodetect", which
                             should work for most cases (by picking one of the
                             others). The handlers are:
 
-                                {{ handlers }}
+                                {{ dateHandlers }}
+
+                            Number: The default is "startingNumber". The
+                            handlers are:
+
+                                {{ numberHandlers }}
 
     --help              -h  This message
 
@@ -79,12 +86,36 @@ Finds log file lines between the supplied before and after dates.
                             intended for general use, and is instead present
                             as a reference for people who want to use this
                             package's API directly.
+
+    --type              -t  The type, one of:
+
+                                date
+                                    Date formats that Javascript can parse
+                                    are required for --after and --before,
+                                    and ISO8601 (eg. 1999-12-31T23:59:59Z)
+                                    is probably the easiest.
+                                number
+                                    A Javascript-parseable number is
+                                    required for --after and --before
+
+                            This defaults to date
     `
     .replace(/^[ ]+/g, "")
     .replace(/[ ]+$/, "\n\n")
     .replace(
-        /^([ ]*){{ handlers }}/m,
+        /^([ ]*){{ dateHandlers }}/m,
         (all, $1) => [...Factory.dateHandlerDescriptions.entries()].map(
+            ([k, v]) => {
+                const prefix = $1 + "    "
+                const viewWidth = 80
+                const pattern = new RegExp(`(.{${viewWidth - prefix.length - 4},${viewWidth - prefix.length}})[ ]`, "g")
+                return `${$1}${k}\n` + prefix + v.replace(pattern, `$1\n${prefix}`)
+            }
+        ).join("\n")
+    )
+    .replace(
+        /^([ ]*){{ numberHandlers }}/m,
+        (all, $1) => [...Factory.numberHandlerDescriptions.entries()].map(
             ([k, v]) => {
                 const prefix = $1 + "    "
                 const viewWidth = 80
@@ -104,11 +135,22 @@ if(options["help"]) {
     process.exit(1)
 }
 
-const binarySearchTester = Factory.getBinarySearchDateTester(format)
-const binarySearchTesterInstance = new binarySearchTester(
-    dateOrNull(lowString),
-    dateOrNull(highString)
-)
+let binarySearchTesterInstance: BinarySearchTester.Base<any>
+if(type == "date") {
+    const binarySearchTester = Factory.getBinarySearchDateTester(format)
+    binarySearchTesterInstance = new binarySearchTester(
+        dateOrNull(lowString),
+        dateOrNull(highString)
+    )
+} else if(type == "number") {
+    const binarySearchTester = Factory.getBinarySearchNumberTester(format)
+    binarySearchTesterInstance = new binarySearchTester(
+        +lowString,
+        +highString
+    )
+} else {
+    throw new Error(`Unhandled type: ${type}`)
+}
 const lineFinder = Factory.getLineFinder()
 
 async function findLines() {

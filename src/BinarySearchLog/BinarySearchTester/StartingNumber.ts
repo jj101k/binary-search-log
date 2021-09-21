@@ -4,6 +4,8 @@ import { Base } from "./Base"
 export class StartingNumber extends Base<number> {
     linePattern = /^(\d+)/
 
+    static description = "Handles lines which start with numbers (eg. timestamps)"
+
     /**
      * This must return -1 for lines before the intended range,
      * 1 for lines after the intended range, and 0 for lines in range

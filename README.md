@@ -30,7 +30,7 @@ you can expect that you'd have the same performance as a straight search.
 If you're just using the command-line utility, you can do something like:
 
 ```sh
-binary-search-log --after-date 2021-09-01T00:00:00 --before-date 2021-09-09T05:20:00 \
+binary-search-log --after 2021-09-01T00:00:00 --before 2021-09-09T05:20:00 \
     --format DateAutodetect /var/log/system.log | less
 ```
 
