@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { BinarySearchTester, EOLPattern, Errors, Factory } from "./index"
 import getopts from "getopts"
+import { SearcherInfoFormatter } from "./src/SearcherInfoFormatter"
 
 /**
  *
@@ -104,25 +105,21 @@ Finds log file lines between the supplied before and after dates.
     .replace(/[ ]+$/, "\n\n")
     .replace(
         /^([ ]*){{ dateHandlers }}/m,
-        (all, $1) => [...Factory.dateHandlerDescriptions.entries()].map(
-            ([k, v]) => {
-                const prefix = $1 + "    "
-                const viewWidth = 80
-                const pattern = new RegExp(`(.{${viewWidth - prefix.length - 4},${viewWidth - prefix.length}})[ ]`, "g")
-                return `${$1}${k}\n` + prefix + v.replace(pattern, `$1\n${prefix}`)
-            }
-        ).join("\n")
+        (all, $1) => {
+            const formatter = new SearcherInfoFormatter($1)
+            return [...Factory.dateHandlerDescriptions.entries()].map(
+                ([name, description]) => formatter.format(name, description)
+            ).join("\n")
+        }
     )
     .replace(
         /^([ ]*){{ numberHandlers }}/m,
-        (all, $1) => [...Factory.numberHandlerDescriptions.entries()].map(
-            ([k, v]) => {
-                const prefix = $1 + "    "
-                const viewWidth = 80
-                const pattern = new RegExp(`(.{${viewWidth - prefix.length - 4},${viewWidth - prefix.length}})[ ]`, "g")
-                return `${$1}${k}\n` + prefix + v.replace(pattern, `$1\n${prefix}`)
-            }
-        ).join("\n")
+        (all, $1) => {
+            const formatter = new SearcherInfoFormatter($1)
+            return [...Factory.numberHandlerDescriptions.entries()].map(
+                ([name, description]) => formatter.format(name, description)
+            ).join("\n")
+        }
     )
     process.stdout.write(message)
 }
