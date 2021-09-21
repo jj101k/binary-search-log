@@ -241,13 +241,10 @@ export abstract class Base {
         }
     }
 
-    /**
-     * This reads all the lines in range, as a series of blocks
-     */
-    async *read() {
+    async findEdges() {
         if(this.fileLength == 0) {
             // No lines
-            return
+            return null
         }
         const lastLine = await this.readLastLineBackwards(this.fileLength)
         if(lastLine.length == 0) {
@@ -256,7 +253,7 @@ export abstract class Base {
         const lastLineRelativePosition = this.binarySearchTester.getRelativeLinePosition(lastLine)
         if(lastLineRelativePosition < 0) {
             // Last line is before range
-            return
+            return null
         }
         const {line: firstLine} = await this.firstLineInfoForwards(0)
         if(firstLine === null) {
@@ -268,7 +265,7 @@ export abstract class Base {
         const firstLinePosition = this.binarySearchTester.getRelativeLinePosition(firstLine)
         if(firstLinePosition > 0) {
             // First line is after range
-            return
+            return null
         }
 
         let toPosition: number | null
@@ -287,6 +284,18 @@ export abstract class Base {
             // Start from zero
             fromPosition = 0
         }
+        return [fromPosition, toPosition]
+    }
+
+    /**
+     * This reads all the lines in range, as a series of blocks
+     */
+    async *read() {
+        const positions = await this.findEdges()
+        if(!positions) {
+            return
+        }
+        const [fromPosition, toPosition] = positions
 
         let pos = fromPosition
         do {

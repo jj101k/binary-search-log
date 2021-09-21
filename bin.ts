@@ -26,6 +26,7 @@ const options = getopts(process.argv.slice(2), {
       "before-date": "b",
       "format": "f",
       "help": "h",
+      "no-lines": "n",
       "sample-consumer": "s"
     },
     boolean: ["h", "s"],
@@ -39,6 +40,7 @@ const filenames = options._
 const format = options["format"]
 const lowString = options["after-date"]
 const highString = options["before-date"]
+const noLines = options["no-lines"]
 const sampleConsumer = options["sample-consumer"]
 
 const programName = "binary-search-log"
@@ -67,6 +69,11 @@ Finds log file lines between the supplied before and after dates.
                                 {{ handlers }}
 
     --help              -h  This message
+
+    --no-lines          -n  Do not output any lines, just find the edges.
+                            This is a good way to test the timing of the
+                            search itself, or just whether the lines exist in
+                            the file(s).
 
     --sample-consumer   -s  An example consumer of the line data. This isn't
                             intended for general use, and is instead present
@@ -113,7 +120,15 @@ async function findLines() {
             EOLPattern.FoldedLine
         )
 
-        if(sampleConsumer) {
+        if(noLines) {
+            const positions = await finder.findEdges()
+            if(!positions) {
+                process.stdout.write(`${filename}: no match\n`)
+            } else {
+                const [from, to] = positions
+                process.stdout.write(`${filename}: matches in range ${from} to ${to}\n`)
+            }
+        } else if(sampleConsumer) {
             let l = 0
             const prefixes = new Map<string, number>()
             const highest = {count: 0, prefix: ""}
