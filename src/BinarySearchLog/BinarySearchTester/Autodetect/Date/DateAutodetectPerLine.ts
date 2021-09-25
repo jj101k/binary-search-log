@@ -17,11 +17,11 @@ export class DateAutodetectPerLine extends Base<Date> {
         super(lowBound, highBound)
     }
 
-    getRelativeLinePosition(line: string) {
+    getRelativeLinePosition(line: string, adjust = 0) {
         for(const c of Object.values(Factory.dateHandlers)) {
             const i = new c(this.lowBound, this.highBound, this.referenceDate)
             try {
-                return i.getRelativeLinePosition(line)
+                return i.getRelativeLinePosition(line, adjust)
             } catch(e) {
                 // Skip it
             }

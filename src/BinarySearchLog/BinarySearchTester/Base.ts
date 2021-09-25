@@ -5,8 +5,9 @@ export abstract class Base<T> {
      *
      * @param lowBound
      * @param highBound
+     * @param fuzz
      */
-    constructor(protected lowBound: T | null, protected highBound: T | null) {
+    constructor(protected lowBound: T | null, protected highBound: T | null, private fuzz: number = 0) {
     }
 
     /**
@@ -14,8 +15,10 @@ export abstract class Base<T> {
      * 1 for lines after the intended range, and 0 for lines in range
      *
      * @param line
+     * @param adjust Meaning depends on context, but this is how far the line's
+     * value will be adjusted before comparison. Can be negative.
      * @throws
      * @returns
      */
-    abstract getRelativeLinePosition(line: string): number
+    abstract getRelativeLinePosition(line: string, adjust?: number): number
 }

@@ -72,9 +72,10 @@ export abstract class Base {
     /**
      *
      * @param lookEarlier
+     * @param adjust
      * @returns
      */
-    protected async findPosition(lookEarlier: (r: number) => boolean) {
+    protected async findPosition(lookEarlier: (r: number) => boolean, adjust = 0) {
         let before = -1
         let after = this.fileLength
         let testPosition = Math.round((before + after) / 2)
@@ -98,7 +99,7 @@ export abstract class Base {
                     testPosition = Math.round((before + testPosition) / 2)
                 }
             } else {
-                const state = this.binarySearchTester.getRelativeLinePosition(lineInfo.line)
+                const state = this.binarySearchTester.getRelativeLinePosition(lineInfo.line, adjust)
                 if(lookEarlier(state)) {
                     after = testPosition
                     lineStartsBefore = testPosition
@@ -215,12 +216,14 @@ export abstract class Base {
      * @param filename
      * @param capturingLineEnding
      * @param filehandle
+     * @param fuzz
      */
     constructor(
         protected binarySearchTester: BinarySearchTester.Base<any>,
         private filename: string,
         protected capturingLineEnding: RegExp = UNIXLine,
         filehandle: number | null = null,
+        protected fuzz = 0,
     ) {
         this.buffer = Buffer.alloc(this.defaultChunkSize)
         if(filehandle) {
@@ -250,9 +253,9 @@ export abstract class Base {
         if(lastLine.length == 0) {
             throw new Errors.InvalidFile("Last line is empty")
         }
-        const lastLineRelativePosition = this.binarySearchTester.getRelativeLinePosition(lastLine)
+        const lastLineRelativePosition = this.binarySearchTester.getRelativeLinePosition(lastLine, this.fuzz)
         if(lastLineRelativePosition < 0) {
-            // Last line is before range
+            // Last line (even last line + fuzz) is before range
             return null
         }
         const {line: firstLine} = await this.firstLineInfoForwards(0)
@@ -262,16 +265,16 @@ export abstract class Base {
         if(firstLine.length == 0) {
             throw new Errors.InvalidFile("First line is empty")
         }
-        const firstLinePosition = this.binarySearchTester.getRelativeLinePosition(firstLine)
+        const firstLinePosition = this.binarySearchTester.getRelativeLinePosition(firstLine, -this.fuzz)
         if(firstLinePosition > 0) {
-            // First line is after range
+            // First line (even first line - fuzz) is after range
             return null
         }
 
         let toPosition: number | null
         if(lastLineRelativePosition > 0) {
             // Find finish
-            toPosition = await this.findPosition(state => state > 0)
+            toPosition = await this.findPosition(state => state > 0, -this.fuzz)
         } else {
             // end at the end
             toPosition = this.fileLength
@@ -279,7 +282,7 @@ export abstract class Base {
         let fromPosition: number | null
         if(firstLinePosition < 0) {
             // Find start
-            fromPosition = await this.findPosition(state => state >= 0)
+            fromPosition = await this.findPosition(state => state >= 0, this.fuzz)
         } else {
             // Start from zero
             fromPosition = 0
@@ -297,12 +300,33 @@ export abstract class Base {
         }
         const [fromPosition, toPosition] = positions
 
-        let pos = fromPosition
-        do {
-            const block = await this.readString(pos, toPosition)
-            yield block
-            pos += block.length
-        } while(pos < toPosition)
+        if(this.fuzz) {
+            let remaining = ""
+            let pos = fromPosition
+            do {
+                const block = await this.readString(pos, toPosition)
+                const contents = remaining + block
+                const lines = contents.split(this.capturingLineEnding)
+                remaining = lines.pop() ?? ""
+                for(let i = 0; i < lines.length; i += 2) {
+                    const line = lines[i] + lines[i + 1]
+                    if(this.binarySearchTester.getRelativeLinePosition(line) == 0) {
+                        yield lines[i] + lines[i + 1]
+                    }
+                }
+                pos += block.length
+            } while(pos < toPosition)
+            if(remaining != "") {
+                yield remaining
+            }
+        } else {
+            let pos = fromPosition
+            do {
+                const block = await this.readString(pos, toPosition)
+                yield block
+                pos += block.length
+            } while(pos < toPosition)
+        }
     }
 
     /**

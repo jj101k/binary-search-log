@@ -25,10 +25,13 @@ export abstract class Base extends AnyBase<Date> {
         }
     }
 
-    getRelativeLinePosition(line: string) {
+    getRelativeLinePosition(line: string, adjust = 0) {
         let md
         if(md = line.match(this.linePattern)) {
             const d = new Date(this.sanitise(md[1]))
+            if(adjust) {
+                d.setSeconds(d.getSeconds() + adjust)
+            }
             if(this.lowBound !== null && d < this.lowBound) {
                 return -1
             } else if(this.highBound !== null && d > this.highBound) {

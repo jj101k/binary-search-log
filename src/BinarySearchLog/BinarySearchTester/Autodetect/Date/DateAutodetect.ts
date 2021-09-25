@@ -22,12 +22,12 @@ export class DateAutodetect extends Base<Date> {
         super(lowBound, highBound)
     }
 
-    getRelativeLinePosition(line: string) {
+    getRelativeLinePosition(line: string, adjust = 0) {
         if(!this.proxy) {
             for(const c of Object.values(Factory.dateHandlers)) {
                 const i = new c(this.lowBound, this.highBound, this.referenceDate)
                 try {
-                    i.getRelativeLinePosition(line)
+                    i.getRelativeLinePosition(line, adjust)
                     this.proxy = i
                     break
                 } catch(e) {

@@ -6,18 +6,13 @@ export class StartingNumber extends Base<number> {
 
     static description = "Handles lines which start with numbers (eg. timestamps)"
 
-    /**
-     * This must return -1 for lines before the intended range,
-     * 1 for lines after the intended range, and 0 for lines in range
-     *
-     * @param line
-     * @throws
-     * @returns
-     */
-     getRelativeLinePosition(line: string) {
+    getRelativeLinePosition(line: string, adjust = 0) {
         let md
         if(md = line.match(this.linePattern)) {
-            const n = +md[1]
+            let n = +md[1]
+            if(adjust) {
+                n = n + adjust
+            }
             if(this.lowBound !== null && n < this.lowBound) {
                 return -1
             } else if(this.highBound !== null && n > this.highBound) {
