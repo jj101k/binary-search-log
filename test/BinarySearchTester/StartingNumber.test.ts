@@ -1,6 +1,7 @@
 import assert from "assert"
 import {describe, it} from "mocha"
 import { Factory } from "../../index"
+import * as fs from "fs"
 
 describe("Date searcher tests (starting number)", () => {
     const lineFinder = Factory.getLineFinder("line")
@@ -58,6 +59,54 @@ describe("Date searcher tests (starting number)", () => {
             }
             file.finish()
             assert.equal(seenLines, 100, "Matching lines seen")
+        })
+    })
+    describe("Can find every line in a disordered file", function() {
+        this.slow(500) // these have a lot of work to do
+        const example1To100DisorderedLogFile = __dirname + "/../data/range1-100-disordered.log.example"
+
+        const requiredFuzz = 30
+        let fileHandle: number
+        before(() => fileHandle = fs.openSync(example1To100DisorderedLogFile, "r"))
+        after(() => fs.closeSync(fileHandle))
+        const byteLineFinder = Factory.getLineFinder("byte")
+        it("Works by-byte", async () => {
+            for(let i = 1; i <= 100; i++) {
+                const file = new byteLineFinder(
+                    new binarySearchTester(i, i),
+                    example1To100DisorderedLogFile,
+                    undefined,
+                    fileHandle,
+                    requiredFuzz,
+                )
+                let seenLines = 0
+                for await(const line of file.readLines()) {
+                    seenLines++
+                    const parts = line.split(/ +/, 3)
+                    assert.equal(parts[0], i)
+                }
+                file.finish()
+                assert.equal(seenLines, 1, `Exactly one line seen (${i})`)
+            }
+        })
+        it("Works by-line", async () => {
+            for(let i = 1; i <= 100; i++) {
+                const file = new lineFinder(
+                    new binarySearchTester(i, i),
+                    example1To100DisorderedLogFile,
+                    undefined,
+                    fileHandle,
+                    requiredFuzz,
+                )
+                let seenLines = 0
+                for await(const line of file.readLines()) {
+                    seenLines++
+                    const parts = line.split(/ +/, 3)
+                    assert.equal(parts[0], i)
+                }
+                file.finish()
+                assert.equal(seenLines, 1, `Exactly one line seen (${i})`)
+            }
         })
     })
 })
