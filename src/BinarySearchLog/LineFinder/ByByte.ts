@@ -1,8 +1,8 @@
 import { Base } from "./Base"
 import { LineInfo } from "./LineInfo"
 export class ByByte extends Base {
-    protected async findPosition(lookEarlier: (r: number) => boolean) {
-        const after = await super.findPosition(lookEarlier)
+    protected async findPosition(lookEarlier: (r: number) => boolean, adjust = 0) {
+        const after = await super.findPosition(lookEarlier, adjust)
 
         /*
          * This reads forward one line on finish, because the quirks
