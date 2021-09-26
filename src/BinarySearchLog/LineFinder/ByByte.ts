@@ -9,19 +9,18 @@ export class ByByte extends Base {
          * of looking for the first COMPLETE line mean that this will
          * always produce a result which is one line early.
          *
-         * Note: This won't work correctly for position=0, but if the first line
-         * is in range the test for start position won't be performed, and if
-         * the first line is at the end of the range the result for the
-         * end-of-range search will be position=1. If this really bothers you
-         * you can say `if(position == 0) return position`, but it won't
-         * actually ever run.
+         * Except when it's the first position in the file, or otherwise after
+         * the last newline, in which case the original position is retained.
          */
-
         const position = after
-        const contents = await this.readString(position)
-        const lines = contents.split(this.capturingLineEnding, 2)
-
-        return position + lines[0].length + lines[1].length
+        if(position != 0) {
+            const contents = await this.readString(position)
+            const lines = contents.split(this.capturingLineEnding, 2)
+            if(lines.length > 1) {
+                return position + lines[0].length + lines[1].length
+            }
+        }
+        return position
     }
 
     protected firstLineInfoGivenCeiling(testPosition: number, afterPosition: number) {
