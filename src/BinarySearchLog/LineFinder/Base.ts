@@ -196,7 +196,9 @@ export abstract class Base {
     protected async readString(startPosition: number, finishBeforePosition: number | null = null) {
         let position: number
         let size: number
-        if(startPosition >= 0) {
+        if(finishBeforePosition !== null && finishBeforePosition < startPosition) {
+            throw new Error(`Finish position ${finishBeforePosition} is after ${startPosition}`)
+        } else if(startPosition >= 0) {
             position = startPosition
             size = finishBeforePosition === null ?
                 this.defaultChunkSize :
