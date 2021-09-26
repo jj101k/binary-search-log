@@ -275,6 +275,7 @@ export abstract class Base {
 
         let toPosition: number | null
         if(lastLineRelativePosition > 0) {
+            // The range may end before the last line
             // Find finish
             toPosition = await this.findPosition(state => state > 0, -this.fuzz)
         } else {
@@ -282,8 +283,11 @@ export abstract class Base {
             toPosition = this.fileLength
         }
         let fromPosition: number | null
+
         if(firstLinePosition < 0) {
-            // Find start
+            // The range may start after the first line
+            // ie, the first line is not after start + fuzz
+            // or, first line - fuzz is not after start
             fromPosition = await this.findPosition(state => state >= 0, this.fuzz)
         } else {
             // Start from zero
