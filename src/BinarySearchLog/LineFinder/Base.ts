@@ -75,7 +75,7 @@ export abstract class Base {
      * @param adjust
      * @returns
      */
-    protected async findPosition(lookEarlier: (r: number) => boolean, adjust = 0) {
+    protected async findPosition(lookEarlier: (r: number) => boolean, adjust: number) {
         let before = -1
         let after = this.fileLength
         let testPosition = Math.round((before + after) / 2)

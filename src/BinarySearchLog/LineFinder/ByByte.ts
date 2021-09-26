@@ -1,7 +1,7 @@
 import { Base } from "./Base"
 import { LineInfo } from "./LineInfo"
 export class ByByte extends Base {
-    protected async findPosition(lookEarlier: (r: number) => boolean, adjust = 0) {
+    protected async findPosition(lookEarlier: (r: number) => boolean, adjust: number) {
         const after = await super.findPosition(lookEarlier, adjust)
 
         /*
