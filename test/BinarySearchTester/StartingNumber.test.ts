@@ -109,4 +109,46 @@ describe("Date searcher tests (starting number)", () => {
             }
         })
     })
+    describe("Can find one line in a presumed-disordered file", function() {
+        const example1To100LogFile = __dirname + "/../data/range1-100.log.example"
+
+        const requiredFuzz = 3
+        const byteLineFinder = Factory.getLineFinder("byte")
+        const lowPoint = 50
+        const highPoint = 59
+        it("Works by-byte", async () => {
+            const file = new byteLineFinder(
+                new binarySearchTester(lowPoint, highPoint),
+                example1To100LogFile,
+                undefined,
+                undefined,
+                requiredFuzz,
+            )
+            let seenLines = 0
+            for await(const line of file.readLines()) {
+                seenLines++
+                const parts = line.split(/ +/, 3)
+                assert(+parts[0] >= lowPoint && +parts[0] <= highPoint)
+            }
+            file.finish()
+            assert.equal(seenLines, 10, `Exactly ten lines seen`)
+        })
+        it("Works by-line", async () => {
+            const file = new lineFinder(
+                new binarySearchTester(lowPoint, 59),
+                example1To100LogFile,
+                undefined,
+                undefined,
+                requiredFuzz,
+            )
+            let seenLines = 0
+            for await(const line of file.readLines()) {
+                seenLines++
+                const parts = line.split(/ +/, 3)
+                assert(+parts[0] >= lowPoint && +parts[0] <= highPoint)
+            }
+            file.finish()
+            assert.equal(seenLines, 10, `Exactly ten lines seen`)
+        })
+    })
 })
