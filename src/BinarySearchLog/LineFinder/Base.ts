@@ -49,6 +49,42 @@ export abstract class Base {
     }
 
     /**
+     * This reads the lines in the range in a series of blocks. If you want to
+     * switch to plain block mode, you emit item.remaining and set the start
+     * position to item.position.
+     *
+     * @param fromPosition
+     * @param toPosition
+     */
+     private async *readLinesInBlocks(fromPosition: number, toPosition: number) {
+        let remaining = ""
+        let position = fromPosition
+        do {
+            const block = await this.readString(position, toPosition)
+            position += block.length
+            const contents = remaining + block
+            const lines = contents.split(this.capturingLineEnding)
+            remaining = lines.pop() ?? ""
+            for(let i = 0; i < lines.length; i += 2) {
+                yield {
+                    line: lines[i] + lines[i + 1],
+                    position,
+                    get remaining() {
+                        return lines.slice(i + 2).join("") + remaining
+                    },
+                }
+            }
+        } while(position < toPosition)
+        if(remaining) {
+            yield {
+                line: remaining,
+                position,
+                remaining: "",
+            }
+        }
+    }
+
+    /**
      *
      */
     protected filehandle: number
@@ -307,23 +343,51 @@ export abstract class Base {
         const [fromPosition, toPosition] = positions
 
         if(this.fuzz) {
-            let remaining = ""
+            // Goes a little differently: read until low + fuzz (ie, n - fuzz is
+            // no longer <= low), blocks until high - fuzz, then read until high
+            // + fuzz
+
+            const fuzzEndPosition = await this.findPosition(state => state > 0, this.fuzz)
+            const fuzzAtEnd = Math.max(Math.min(fuzzEndPosition, toPosition), fromPosition)
+
             let pos = fromPosition
-            do {
-                const block = await this.readString(pos, toPosition)
-                const contents = remaining + block
-                const lines = contents.split(this.capturingLineEnding)
-                remaining = lines.pop() ?? ""
-                for(let i = 0; i < lines.length; i += 2) {
-                    const line = lines[i] + lines[i + 1]
-                    if(this.binarySearchTester.getRelativeLinePosition(line) == 0) {
-                        yield lines[i] + lines[i + 1]
-                    }
+            for await (const lineInfo of this.readLinesInBlocks(fromPosition, fuzzAtEnd)) {
+                pos = lineInfo.position
+                const line = lineInfo.line
+                const relativePosition = this.binarySearchTester.getRelativeLinePosition(line)
+                if(relativePosition == 0) {
+                    yield line
                 }
+                if(
+                    relativePosition > -1 &&
+                    this.binarySearchTester.getRelativeLinePosition(line, -this.fuzz) > -1
+                ) {
+                    // line - fuzz is in or after range - eg. for 20..30
+                    // fuzz 3, 20-3 does not hit but 23-3 does, and for
+                    // 30..31 fuzz 2, 30-2 does not hit but 32-2 does.
+                    //
+                    // This can only apply if the current line is already at
+                    // or after the range.
+
+                    yield lineInfo.remaining
+                    break
+                }
+            }
+            do {
+                const block = await this.readString(pos, fuzzAtEnd)
+                yield block
                 pos += block.length
-            } while(pos < toPosition)
-            if(remaining != "") {
-                yield remaining
+            } while(pos < fuzzAtEnd)
+
+            for await (const {line} of this.readLinesInBlocks(pos, toPosition)) {
+                if(this.binarySearchTester.getRelativeLinePosition(line) == 0) {
+                    yield line
+                } else if(this.binarySearchTester.getRelativeLinePosition(line, -this.fuzz) > 1) {
+                    // Line - fuzz is after range, eg for 20-30 fuzz 3, 31-3
+                    // is not but 34-3 is. This only applies where line is
+                    // after range.
+                    break
+                }
             }
         } else {
             let pos = fromPosition
