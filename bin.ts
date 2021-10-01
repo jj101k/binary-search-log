@@ -27,6 +27,7 @@ const options = getopts(process.argv.slice(2), {
       "before-date": "b",
       "format": "f",
       "help": "h",
+      "max-skew": "m",
       "no-lines": "n",
       "sample-consumer": "s",
       "type": "t",
@@ -35,13 +36,14 @@ const options = getopts(process.argv.slice(2), {
     default: {
         "f": "DateAutodetect"
     },
-    string: ["a", "b", "f", "t"],
+    string: ["a", "b", "f", "m", "t"],
 })
 
 const filenames = options._
 const format = options["format"]
 const lowString = options["after"]
 const highString = options["before-date"]
+const maxSkew = +(options["max-skew"] || 0)
 const noLines = options["no-lines"]
 const sampleConsumer = options["sample-consumer"]
 const type = options["type"] || "date"
@@ -51,7 +53,7 @@ const programName = "binary-search-log"
 function help() {
     const message = `
 Usage: ${programName} [--type date] [--after EXPRESSION] [--before EXPRESSION]
-    [--format FORMAT] [--help] [-s] FILENAME...
+    [--format FORMAT] [--max-skew NUMBER] [--help] [-s] FILENAME...
 
 Finds log file lines between the supplied before and after dates.
 
@@ -82,6 +84,11 @@ Finds log file lines between the supplied before and after dates.
                             This is a good way to test the timing of the
                             search itself, or just whether the lines exist in
                             the file(s).
+
+    --max-skew          -m  Where the lines are a little disordered, the
+                            maximum number of places you expect anything to
+                            be skewed by. For dates, this is a number of
+                            seconds. This defaults to 0.
 
     --sample-consumer   -s  An example consumer of the line data. This isn't
                             intended for general use, and is instead present
@@ -156,7 +163,9 @@ async function findLines() {
         const finder = new lineFinder(
             binarySearchTesterInstance,
             filename,
-            EOLPattern.FoldedLine
+            EOLPattern.FoldedLine,
+            undefined,
+            maxSkew
         )
 
         if(noLines) {
