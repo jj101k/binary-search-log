@@ -74,11 +74,11 @@ buffered before insertion.
 
 Where that's the case, this may end up selecting the wrong start or end points,
 but even the *right* start and end points might not contain the line(s) you're
-seeking. In general for these cases you will want to start at a point that's a
-bit earlier and end at a point that's a bit later - if you pick positions that
-are at the maximum expected skew from the intended points, you should be fine.
-Future versions of this tool might mitigate the behaviour for inconsistently
-ordered files, eg. by applying some fuzz to the search.
+seeking. Where that's the case, you should set the _max skew_ to the maximum
+offset line keys would have from the appropriate one for the file position, and
+the tool will look earlier/finish later and individually check the lines. Keep
+in mind though that this is less efficient - O(n) for the skew distance rather
+than O(log n).
 
 ### What about super-long lines?
 
