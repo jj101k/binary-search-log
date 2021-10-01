@@ -80,6 +80,10 @@ are at the maximum expected skew from the intended points, you should be fine.
 Future versions of this tool might mitigate the behaviour for inconsistently
 ordered files, eg. by applying some fuzz to the search.
 
+### What about super-long lines?
+
+Line which exceeds the block size (currently 64KiB) aren't supported.
+
 ## Supported File Formats
 
 At the time of writing, this supports:
