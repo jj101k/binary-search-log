@@ -5,9 +5,8 @@ export abstract class Base<T> {
      *
      * @param lowBound
      * @param highBound
-     * @param fuzz
      */
-    constructor(protected lowBound: T | null, protected highBound: T | null, private fuzz: number = 0) {
+    constructor(protected lowBound: T | null, protected highBound: T | null) {
     }
 
     /**
