@@ -254,14 +254,14 @@ export abstract class Base {
      * @param filename
      * @param capturingLineEnding
      * @param filehandle
-     * @param fuzz
+     * @param maxSkew
      */
     constructor(
         protected binarySearchTester: BinarySearchTester.Base<any>,
         private filename: string,
         protected capturingLineEnding: RegExp = UNIXLine,
         filehandle: number | null = null,
-        protected fuzz = 0,
+        protected maxSkew = 0,
     ) {
         this.buffer = Buffer.alloc(this.defaultChunkSize)
         if(filehandle) {
@@ -291,9 +291,9 @@ export abstract class Base {
         if(lastLine.length == 0) {
             throw new Errors.InvalidFile("Last line is empty")
         }
-        const lastLineRelativePosition = this.binarySearchTester.getRelativeLinePosition(lastLine, this.fuzz)
+        const lastLineRelativePosition = this.binarySearchTester.getRelativeLinePosition(lastLine, this.maxSkew)
         if(lastLineRelativePosition < 0) {
-            // Last line (even last line + fuzz) is before range
+            // Last line (even last line + maxSkew) is before range
             return null
         }
         const {line: firstLine} = await this.firstLineInfoForwards(0)
@@ -303,9 +303,9 @@ export abstract class Base {
         if(firstLine.length == 0) {
             throw new Errors.InvalidFile("First line is empty")
         }
-        const firstLinePosition = this.binarySearchTester.getRelativeLinePosition(firstLine, -this.fuzz)
+        const firstLinePosition = this.binarySearchTester.getRelativeLinePosition(firstLine, -this.maxSkew)
         if(firstLinePosition > 0) {
-            // First line (even first line - fuzz) is after range
+            // First line (even first line - maxSkew) is after range
             return null
         }
 
@@ -313,7 +313,7 @@ export abstract class Base {
         if(lastLineRelativePosition > 0) {
             // The range may end before the last line
             // Find finish
-            toPosition = await this.findPosition(state => state > 0, -this.fuzz)
+            toPosition = await this.findPosition(state => state > 0, -this.maxSkew)
         } else {
             // end at the end
             toPosition = this.fileLength
@@ -322,9 +322,9 @@ export abstract class Base {
 
         if(firstLinePosition < 0) {
             // The range may start after the first line
-            // ie, the first line is not after start + fuzz
-            // or, first line - fuzz is not after start
-            fromPosition = await this.findPosition(state => state >= 0, this.fuzz)
+            // ie, the first line is not after start + maxSkew
+            // or, first line - maxSkew is not after start
+            fromPosition = await this.findPosition(state => state >= 0, this.maxSkew)
         } else {
             // Start from zero
             fromPosition = 0
@@ -342,16 +342,16 @@ export abstract class Base {
         }
         const [fromPosition, toPosition] = positions
 
-        if(this.fuzz) {
-            // Goes a little differently: read until low + fuzz (ie, n - fuzz is
-            // no longer <= low), blocks until high - fuzz, then read until high
-            // + fuzz
+        if(this.maxSkew) {
+            // Goes a little differently: read until low + maxSkew (ie, n - maxSkew is
+            // no longer <= low), blocks until high - maxSkew, then read until high
+            // + maxSkew
 
-            const fuzzEndPosition = await this.findPosition(state => state > 0, this.fuzz)
-            const fuzzAtEnd = Math.max(Math.min(fuzzEndPosition, toPosition), fromPosition)
+            const skewedEndPosition = await this.findPosition(state => state > 0, this.maxSkew)
+            const skewedAtEnd = Math.max(Math.min(skewedEndPosition, toPosition), fromPosition)
 
             let pos = fromPosition
-            for await (const lineInfo of this.readLinesInBlocks(fromPosition, fuzzAtEnd)) {
+            for await (const lineInfo of this.readLinesInBlocks(fromPosition, skewedAtEnd)) {
                 pos = lineInfo.position
                 const line = lineInfo.line
                 const relativePosition = this.binarySearchTester.getRelativeLinePosition(line)
@@ -360,11 +360,11 @@ export abstract class Base {
                 }
                 if(
                     relativePosition > -1 &&
-                    this.binarySearchTester.getRelativeLinePosition(line, -this.fuzz) > -1
+                    this.binarySearchTester.getRelativeLinePosition(line, -this.maxSkew) > -1
                 ) {
-                    // line - fuzz is in or after range - eg. for 20..30
-                    // fuzz 3, 20-3 does not hit but 23-3 does, and for
-                    // 30..31 fuzz 2, 30-2 does not hit but 32-2 does.
+                    // line - maxSkew is in or after range - eg. for 20..30
+                    // maxSkew 3, 20-3 does not hit but 23-3 does, and for
+                    // 30..31 maxSkew 2, 30-2 does not hit but 32-2 does.
                     //
                     // This can only apply if the current line is already at
                     // or after the range.
@@ -374,17 +374,17 @@ export abstract class Base {
                 }
             }
             do {
-                const block = await this.readString(pos, fuzzAtEnd)
+                const block = await this.readString(pos, skewedAtEnd)
                 yield block
                 pos += block.length
-            } while(pos < fuzzAtEnd)
+            } while(pos < skewedAtEnd)
 
             for await (const {line} of this.readLinesInBlocks(pos, toPosition)) {
                 if(this.binarySearchTester.getRelativeLinePosition(line) == 0) {
                     yield line
-                } else if(this.binarySearchTester.getRelativeLinePosition(line, -this.fuzz) > 1) {
-                    // Line - fuzz is after range, eg for 20-30 fuzz 3, 31-3
-                    // is not but 34-3 is. This only applies where line is
+                } else if(this.binarySearchTester.getRelativeLinePosition(line, -this.maxSkew) > 1) {
+                    // Line - maxSkew is after range, eg for 20-30 maxSkew 3,
+                    // 31-3 is not but 34-3 is. This only applies where line is
                     // after range.
                     break
                 }

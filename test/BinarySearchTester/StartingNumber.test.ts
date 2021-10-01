@@ -65,7 +65,7 @@ describe("Date searcher tests (starting number)", () => {
         this.slow(500) // these have a lot of work to do
         const example1To100DisorderedLogFile = __dirname + "/../data/range1-100-disordered.log.example"
 
-        const requiredFuzz = 30
+        const maxSkew = 30
         let fileHandle: number
         before(() => fileHandle = fs.openSync(example1To100DisorderedLogFile, "r"))
         after(() => fs.closeSync(fileHandle))
@@ -77,7 +77,7 @@ describe("Date searcher tests (starting number)", () => {
                     example1To100DisorderedLogFile,
                     undefined,
                     fileHandle,
-                    requiredFuzz,
+                    maxSkew,
                 )
                 let seenLines = 0
                 for await(const line of file.readLines()) {
@@ -96,7 +96,7 @@ describe("Date searcher tests (starting number)", () => {
                     example1To100DisorderedLogFile,
                     undefined,
                     fileHandle,
-                    requiredFuzz,
+                    maxSkew,
                 )
                 let seenLines = 0
                 for await(const line of file.readLines()) {
@@ -112,7 +112,7 @@ describe("Date searcher tests (starting number)", () => {
     describe("Can find one line in a presumed-disordered file", function() {
         const example1To100LogFile = __dirname + "/../data/range1-100.log.example"
 
-        const requiredFuzz = 3
+        const maxSkew = 3
         const byteLineFinder = Factory.getLineFinder("byte")
         const lowPoint = 50
         const highPoint = 59
@@ -122,7 +122,7 @@ describe("Date searcher tests (starting number)", () => {
                 example1To100LogFile,
                 undefined,
                 undefined,
-                requiredFuzz,
+                maxSkew,
             )
             let seenLines = 0
             for await(const line of file.readLines()) {
@@ -139,7 +139,7 @@ describe("Date searcher tests (starting number)", () => {
                 example1To100LogFile,
                 undefined,
                 undefined,
-                requiredFuzz,
+                maxSkew,
             )
             let seenLines = 0
             for await(const line of file.readLines()) {
