@@ -43,8 +43,7 @@ describe("File-by-byte tests", () => {
         )
     }
 
-    // You can remove .skip below if you want to try this.
-    describe.skip("large file tests", () => {
+    describe("large file tests", () => {
         const largeLogFileLines = 2_000_000
         const logFileData = new TestLogFileData.Number(largeLogFileLines)
         before(() => logFileData.build())
