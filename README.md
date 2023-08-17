@@ -121,3 +121,31 @@ finder.finish()
 ```
 
 At the time of writing, the only such type that's supported is UNIX-like timestamps.
+
+## FUTURE
+
+* Add basic support for embedded `<ol>` in HTML files (header/footer garbage etc)
+
+## That Mitigation
+
+So, the problem file looks like: abcdfghEijk. This creates two problems when
+looking for a point between X (where the line belongs) and X' (where it is): (1)
+if you hit a misplaced line, you'll end up looking too late in the file; and (2)
+if you're looking for that misplaced line otherwise, you'll end up too early in
+the file.
+
+If the first were the only problem, some basic statistical examination of nearby
+rows would do the job - but to hit the second, you need _fuzz_. For scenario 1,
+you need to start _fuzz_ distance early; and for scenario 2 you need to end
+_fuzz_ distance late. Since the matter of whether the line is displaced won't be
+known in advance, fuzz in both directions are needed - and that means that means
+that all lines in the fuzz range must be examined individually (ie, between
+before - fuzz and before, and between after and after + fuzz). On the early side
+that's completely simple: you check until you reach one that reports the
+beginning timestamp. On the late side it's a bit more complicated: there has to
+be a _suspicious range_, and if the _after_ line is displaced that range should
+start a little earlier, so the actual targets are before-fuzz, after-fuzz,
+after+fuzz.
+
+It would be perfectly possible to note out-of-range values where they are found,
+but since only log(n) values will be examined, this will usually not be useful.
