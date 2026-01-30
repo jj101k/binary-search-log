@@ -1,6 +1,6 @@
 {
   "name": "binary-search-log",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A binary searcher for plain-text timestamped logs",
   "main": "dist/index.js",
   "bin": {
